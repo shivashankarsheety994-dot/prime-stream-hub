@@ -79,3 +79,62 @@ export function formatTimestamp(ts?: string | number): string {
   if (isNaN(d.getTime())) return String(ts);
   return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 }
+
+export interface VodInfo {
+  info?: {
+    movie_image?: string;
+    cover_big?: string;
+    plot?: string;
+    genre?: string;
+    duration?: string;
+    releasedate?: string;
+    rating?: string;
+    director?: string;
+    cast?: string;
+    youtube_trailer?: string;
+  };
+  movie_data?: {
+    stream_id: number;
+    name: string;
+    container_extension?: string;
+  };
+}
+
+export async function getVodInfo(
+  username: string,
+  password: string,
+  vodId: number,
+): Promise<VodInfo | null> {
+  try {
+    return await call<VodInfo>({
+      username,
+      password,
+      action: "get_vod_info",
+      vod_id: String(vodId),
+    });
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Build a stream URL for an Xtream VOD item. The Xtream Codes spec serves VOD at:
+ *   {server}/movie/{username}/{password}/{stream_id}.{ext}
+ * Our edge function proxies the upstream API; if it also proxies media, callers
+ * may need to swap the host. We return the canonical Xtream path — if the
+ * `direct_source` field is provided we prefer that.
+ */
+export function buildStreamUrl(
+  movie: VodStream,
+  username: string,
+  password: string,
+): string {
+  if (movie.direct_source && movie.direct_source.startsWith("http")) {
+    return movie.direct_source;
+  }
+  const ext = movie.container_extension || "mp4";
+  const base = API_URL.replace(/\/functions\/v1\/xtream-api\/?$/, "");
+  return `${base}/functions/v1/xtream-api/movie/${encodeURIComponent(
+    username,
+  )}/${encodeURIComponent(password)}/${movie.stream_id}.${ext}`;
+}
