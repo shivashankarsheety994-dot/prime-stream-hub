@@ -1,0 +1,15 @@
+{
+  "name": "Prime Cinema",
+  "short_name": "Prime Cinema",
+  "description": "Stream the latest movies across every genre.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f0f0f",
+  "theme_color": "#000000",
+  "icons": [
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
