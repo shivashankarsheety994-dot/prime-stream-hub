@@ -1,4 +1,4 @@
-const API_URL = "https://cbhcwfjiuwmpjdfimjwd.supabase.co/functions/v1/xtream-api";
+const API_URL = "https://dhceqootnfrrfddxsqdd.supabase.co/functions/v1/player_api";
 
 export interface XtreamUserInfo {
   username: string;
@@ -133,7 +133,7 @@ export function buildStreamUrl(
     return movie.direct_source;
   }
   const ext = movie.container_extension || "mp4";
-  const base = API_URL.replace(/\/functions\/v1\/xtream-api\/?$/, "");
+  const base = API_URL.replace(/\/functions\/v1\/player_api\/?$/, "");
   return `${base}/functions/v1/xtream-api/movie/${encodeURIComponent(
     username,
   )}/${encodeURIComponent(password)}/${movie.stream_id}.${ext}`;
