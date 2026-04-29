@@ -134,7 +134,7 @@ export function buildStreamUrl(
   }
   const ext = movie.container_extension || "mp4";
   const base = API_URL.replace(/\/functions\/v1\/player_api\/?$/, "");
-  return `${base}/functions/v1/xtream-api/movie/${encodeURIComponent(
+  return `${base}/functions/v1/player_api/movie/${encodeURIComponent(
     username,
   )}/${encodeURIComponent(password)}/${movie.stream_id}.${ext}`;
 }
