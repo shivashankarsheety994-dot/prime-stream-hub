@@ -26,6 +26,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
           src={src}
           title={current.name}
           poster={current.stream_icon}
+          movie={current}
           onClose={close}
         />
       )}

@@ -1,15 +1,18 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { X, Play, Pause, Volume2, VolumeX, Loader2, RotateCcw, RotateCw, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { VodStream } from "@/lib/xtream";
+import { getProgress, saveProgress } from "@/lib/watchProgress";
 
 interface Props {
   src: string;
   title: string;
   poster?: string;
+  movie: VodStream;
   onClose: () => void;
 }
 
-export function VideoPlayer({ src, title, poster, onClose }: Props) {
+export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [loading, setLoading] = useState(true);
@@ -22,6 +25,8 @@ export function VideoPlayer({ src, title, poster, onClose }: Props) {
   const [showControls, setShowControls] = useState(true);
   const hideTimer = useRef<number | null>(null);
   const [fitMode, setFitMode] = useState<"contain" | "cover">("contain");
+  const resumedRef = useRef(false);
+  const lastSaveRef = useRef(0);
 
   // Lock scroll while open
   useEffect(() => {
@@ -52,12 +57,25 @@ export function VideoPlayer({ src, title, poster, onClose }: Props) {
   }, [onClose]);
 
   const handleClose = async () => {
+    // Save current position before closing
+    const v = videoRef.current;
+    if (v && v.duration) {
+      saveProgress(movie, v.currentTime, v.duration);
+    }
     if (document.fullscreenElement) {
       try { await document.exitFullscreen?.(); } catch {/* ignore */}
     }
     (screen as any).orientation?.unlock?.();
     onClose();
   };
+
+  // Save periodically while playing & on unmount
+  useEffect(() => {
+    return () => {
+      const v = videoRef.current;
+      if (v && v.duration) saveProgress(movie, v.currentTime, v.duration);
+    };
+  }, [movie]);
 
   const togglePlay = () => {
     const v = videoRef.current; if (!v) return;
@@ -139,8 +157,25 @@ export function VideoPlayer({ src, title, poster, onClose }: Props) {
           onTimeUpdate={(e) => {
             const v = e.currentTarget;
             if (v.duration) setProgress((v.currentTime / v.duration) * 100);
+            // Save every 5 seconds
+            const now = Date.now();
+            if (v.duration && now - lastSaveRef.current > 5000) {
+              lastSaveRef.current = now;
+              saveProgress(movie, v.currentTime, v.duration);
+            }
           }}
-          onLoadedMetadata={(e) => setDuration(e.currentTarget.duration || 0)}
+          onLoadedMetadata={(e) => {
+            const v = e.currentTarget;
+            setDuration(v.duration || 0);
+            // Resume from saved position
+            if (!resumedRef.current) {
+              resumedRef.current = true;
+              const saved = getProgress(movie.stream_id);
+              if (saved && saved.position > 5 && (!v.duration || saved.position < v.duration - 10)) {
+                try { v.currentTime = saved.position; } catch { /* ignore */ }
+              }
+            }
+          }}
           onClick={(e) => { e.stopPropagation(); togglePlay(); bumpControls(); }}
           onLoadedData={() => setLoading(false)}
           onError={() => { setLoading(false); setError("Unable to play this video. The stream may not be available."); }}

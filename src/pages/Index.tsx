@@ -6,12 +6,21 @@ import { Header } from "@/components/Header";
 import { PosterMarquee } from "@/components/PosterMarquee";
 import { GenreRow } from "@/components/GenreRow";
 import { getVodCategories, getVodStreams, VodCategory, VodStream } from "@/lib/xtream";
+import { getContinueWatching, WatchEntry } from "@/lib/watchProgress";
 
 export default function Index() {
   const { user, credentials, loading } = useAuth();
   const [categories, setCategories] = useState<VodCategory[]>([]);
   const [streams, setStreams] = useState<VodStream[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
+  const [continueWatching, setContinueWatching] = useState<WatchEntry[]>([]);
+
+  useEffect(() => {
+    const refresh = () => setContinueWatching(getContinueWatching());
+    refresh();
+    window.addEventListener("watch-progress-updated", refresh);
+    return () => window.removeEventListener("watch-progress-updated", refresh);
+  }, []);
 
   useEffect(() => {
     if (!credentials) return;
@@ -75,7 +84,12 @@ export default function Index() {
           </div>
         ) : (
           <>
-            <GenreRow title="Latest Releases" movies={latest} />
+            {continueWatching.length > 0 && (
+              <GenreRow
+                title="Continue Watching"
+                movies={continueWatching.map((e) => e.movie)}
+              />
+            )}
             {categories.map((cat) => (
               <GenreRow
                 key={cat.category_id}
