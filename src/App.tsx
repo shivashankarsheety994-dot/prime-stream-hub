@@ -9,6 +9,7 @@ import Login from "./pages/Login.tsx";
 import Account from "./pages/Account.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import { PlayerProvider } from "./context/PlayerContext.tsx";
+import { PortraitGate } from "./components/PortraitGate.tsx";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <PortraitGate />
           </PlayerProvider>
         </AuthProvider>
       </BrowserRouter>
