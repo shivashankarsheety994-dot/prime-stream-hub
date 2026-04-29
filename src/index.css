@@ -143,4 +143,24 @@ All colors MUST be HSL.
   .animate-fade-in {
     animation: fade-in 0.6s ease-out forwards;
   }
+
+  /* Force portrait UX on phones: when device is in landscape AND viewport is small,
+     show a rotate-to-portrait overlay (player handles its own landscape mode). */
+  .portrait-only-overlay { display: none; }
+  @media screen and (max-width: 900px) and (orientation: landscape) {
+    .portrait-only-overlay {
+      display: flex;
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      background: hsl(var(--background));
+      color: hsl(var(--foreground));
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 2rem;
+      text-align: center;
+    }
+  }
 }
