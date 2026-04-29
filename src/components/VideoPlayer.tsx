@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { X, Play, Pause, Volume2, VolumeX, Loader2, RotateCcw, RotateCw } from "lucide-react";
+import { X, Play, Pause, Volume2, VolumeX, Loader2, RotateCcw, RotateCw, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
@@ -21,6 +21,7 @@ export function VideoPlayer({ src, title, poster, onClose }: Props) {
   const [duration, setDuration] = useState(0);
   const [showControls, setShowControls] = useState(true);
   const hideTimer = useRef<number | null>(null);
+  const [fitMode, setFitMode] = useState<"contain" | "cover">("contain");
 
   // Lock scroll while open
   useEffect(() => {
@@ -131,7 +132,7 @@ export function VideoPlayer({ src, title, poster, onClose }: Props) {
           playsInline
           controlsList="nodownload noplaybackrate noremoteplayback"
           disablePictureInPicture
-          className="w-full h-full object-contain"
+          className={`w-full h-full ${fitMode === "cover" ? "object-cover" : "object-contain"}`}
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
           onVolumeChange={(e) => { const v = e.currentTarget; setMuted(v.muted); setVolume(v.volume); }}
@@ -229,6 +230,17 @@ export function VideoPlayer({ src, title, poster, onClose }: Props) {
                 />
               </div>
               <p className="ml-auto text-white/90 text-sm md:text-base font-medium truncate max-w-[40%]">{title}</p>
+              <button
+                onClick={() => setFitMode((m) => (m === "contain" ? "cover" : "contain"))}
+                className="text-white hover:text-primary transition-colors flex items-center gap-1.5"
+                aria-label={fitMode === "contain" ? "Fit to screen" : "Original aspect"}
+                title={fitMode === "contain" ? "Fit to screen (fill)" : "Original aspect"}
+              >
+                {fitMode === "contain" ? <Maximize2 className="h-6 w-6" /> : <Minimize2 className="h-6 w-6" />}
+                <span className="hidden md:inline text-xs font-medium">
+                  {fitMode === "contain" ? "Fit" : "Original"}
+                </span>
+              </button>
             </div>
           </div>
         </div>
