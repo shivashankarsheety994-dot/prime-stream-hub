@@ -56,8 +56,26 @@ export default function Index() {
       if (!map.has(id)) map.set(id, []);
       map.get(id)!.push(s);
     });
+    // Sort each category by most-recently-added first
+    map.forEach((list) => {
+      list.sort((a, b) => {
+        const aT = a.added ? parseInt(a.added, 10) : 0;
+        const bT = b.added ? parseInt(b.added, 10) : 0;
+        return bT - aT;
+      });
+    });
     return map;
   }, [streams]);
+
+  // Order categories by their most recent addition (newest first)
+  const orderedCategories = useMemo(() => {
+    const recencyOf = (catId: string) => {
+      const list = byCategory.get(catId);
+      if (!list || list.length === 0) return 0;
+      return list[0].added ? parseInt(list[0].added, 10) : 0;
+    };
+    return [...categories].sort((a, b) => recencyOf(b.category_id) - recencyOf(a.category_id));
+  }, [categories, byCategory]);
 
   if (loading) {
     return (
@@ -90,7 +108,8 @@ export default function Index() {
                 movies={continueWatching.map((e) => e.movie)}
               />
             )}
-            {categories.map((cat) => (
+            <GenreRow title="Recently Added" movies={latest} />
+            {orderedCategories.map((cat) => (
               <GenreRow
                 key={cat.category_id}
                 title={cat.category_name}
