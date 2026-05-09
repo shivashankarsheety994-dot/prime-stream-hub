@@ -2,7 +2,7 @@ import { User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/prime-cinema-logo.png";
+import logo from "/icon-512.png";
 
 export function Header() {
   const { user } = useAuth();
@@ -16,9 +16,9 @@ export function Header() {
             <img
               src={logo}
               alt="Prime Cinema"
-              width={1536}
-              height={1024}
-              className="h-9 md:h-12 w-auto object-contain drop-shadow-[0_0_18px_hsl(var(--primary)/0.55)] transition-transform duration-500 group-hover:scale-[1.04] animate-fade-in"
+              width={512}
+              height={512}
+              className="h-10 md:h-12 w-10 md:w-12 object-contain drop-shadow-[0_0_18px_hsl(var(--primary)/0.6)] transition-transform duration-500 group-hover:scale-[1.06] animate-fade-in"
             />
             <h1 className="sr-only">Prime Cinema</h1>
           </Link>
