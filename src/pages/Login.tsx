@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Film, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
+import logo from "@/assets/prime-cinema-logo.png";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -42,12 +43,14 @@ export default function Login() {
       />
       <div className="w-full max-w-md animate-fade-in">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <Film className="h-8 w-8 text-primary" strokeWidth={2.5} />
-            <h1 className="text-3xl font-bold tracking-[0.2em]">
-              PRIME <span className="text-primary">CINEMA</span>
-            </h1>
-          </div>
+          <img
+            src={logo}
+            alt="Prime Cinema"
+            width={1536}
+            height={1024}
+            className="mx-auto h-16 w-auto object-contain drop-shadow-[0_0_30px_hsl(var(--primary)/0.6)] mb-4"
+          />
+          <h1 className="sr-only">Prime Cinema</h1>
           <p className="text-muted-foreground">Sign in to continue streaming</p>
         </div>
         <form onSubmit={onSubmit} className="bg-card/80 backdrop-blur border border-border rounded-lg p-8 space-y-5 shadow-2xl">
