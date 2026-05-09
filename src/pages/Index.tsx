@@ -108,7 +108,6 @@ export default function Index() {
                 movies={continueWatching.map((e) => e.movie)}
               />
             )}
-            <GenreRow title="Recently Added" movies={latest} />
             {orderedCategories.map((cat) => (
               <GenreRow
                 key={cat.category_id}
