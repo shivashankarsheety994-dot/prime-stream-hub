@@ -65,7 +65,9 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     if (document.fullscreenElement) {
       try { await document.exitFullscreen?.(); } catch {/* ignore */}
     }
-    (screen as any).orientation?.unlock?.();
+    const orientation = (screen as any).orientation;
+    try { await orientation?.lock?.("portrait"); } catch { /* ignore */ }
+    try { orientation?.unlock?.(); } catch { /* ignore */ }
     onClose();
   };
 
