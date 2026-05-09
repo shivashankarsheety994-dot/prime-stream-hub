@@ -65,7 +65,9 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     if (document.fullscreenElement) {
       try { await document.exitFullscreen?.(); } catch {/* ignore */}
     }
-    (screen as any).orientation?.unlock?.();
+    const orientation = (screen as any).orientation;
+    try { await orientation?.lock?.("portrait"); } catch { /* ignore */ }
+    try { orientation?.unlock?.(); } catch { /* ignore */ }
     onClose();
   };
 
@@ -74,6 +76,12 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     return () => {
       const v = videoRef.current;
       if (v && v.duration) saveProgress(movie, v.currentTime, v.duration);
+      const orientation = (screen as any).orientation;
+      try { orientation?.lock?.("portrait").catch?.(() => {}); } catch { /* ignore */ }
+      try { orientation?.unlock?.(); } catch { /* ignore */ }
+      if (document.fullscreenElement) {
+        try { document.exitFullscreen?.(); } catch { /* ignore */ }
+      }
     };
   }, [movie]);
 
