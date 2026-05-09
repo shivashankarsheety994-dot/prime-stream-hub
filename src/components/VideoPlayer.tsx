@@ -76,6 +76,12 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     return () => {
       const v = videoRef.current;
       if (v && v.duration) saveProgress(movie, v.currentTime, v.duration);
+      const orientation = (screen as any).orientation;
+      try { orientation?.lock?.("portrait").catch?.(() => {}); } catch { /* ignore */ }
+      try { orientation?.unlock?.(); } catch { /* ignore */ }
+      if (document.fullscreenElement) {
+        try { document.exitFullscreen?.(); } catch { /* ignore */ }
+      }
     };
   }, [movie]);
 
