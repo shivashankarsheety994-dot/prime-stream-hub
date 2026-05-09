@@ -1,8 +1,7 @@
-import { User } from "lucide-react";
+import { Film, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import logo from "/icon-512.png";
 
 export function Header() {
   const { user } = useAuth();
@@ -12,15 +11,11 @@ export function Header() {
       <div className="container mx-auto flex h-16 items-center px-4 md:px-8">
         <div className="w-32 hidden md:block" />
         <div className="flex-1 flex items-center justify-center gap-2">
-          <Link to="/" aria-label="Prime Cinema home" className="group inline-flex items-center">
-            <img
-              src={logo}
-              alt="Prime Cinema"
-              width={512}
-              height={512}
-              className="h-10 md:h-12 w-10 md:w-12 object-contain drop-shadow-[0_0_18px_hsl(var(--primary)/0.6)] transition-transform duration-500 group-hover:scale-[1.06] animate-fade-in"
-            />
-            <h1 className="sr-only">Prime Cinema</h1>
+          <Link to="/" aria-label="Prime Cinema home" className="inline-flex items-center gap-2">
+            <Film className="h-6 w-6 text-primary" strokeWidth={2.5} />
+            <h1 className="text-2xl md:text-3xl font-bold tracking-[0.2em] text-foreground">
+              PRIME <span className="text-primary">CINEMA</span>
+            </h1>
           </Link>
         </div>
         <div className="w-32 flex justify-end">
