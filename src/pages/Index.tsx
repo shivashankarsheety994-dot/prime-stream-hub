@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { CinemaLoader } from "@/components/CinemaLoader";
 import { useAuth } from "@/context/AuthContext";
 import { Header } from "@/components/Header";
 import { PosterMarquee } from "@/components/PosterMarquee";
@@ -78,11 +78,7 @@ export default function Index() {
   }, [categories, byCategory]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <CinemaLoader fullscreen />;
   }
   if (!user) return <Navigate to="/login" replace />;
 
@@ -92,9 +88,7 @@ export default function Index() {
       <PosterMarquee movies={latest.length ? latest : streams} />
       <main className="pb-16 -mt-8 relative z-10">
         {dataLoading ? (
-          <div className="flex items-center justify-center py-32">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
+          <CinemaLoader label="Loading movies" />
         ) : streams.length === 0 ? (
           <div className="text-center py-32 px-4">
             <h2 className="text-2xl font-bold mb-2">No movies available</h2>
