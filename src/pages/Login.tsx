@@ -75,6 +75,17 @@ export default function Login() {
           <Button type="submit" disabled={loading} className="w-full h-11 text-base font-semibold tracking-wide bg-primary hover:bg-primary/90">
             {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Sign In"}
           </Button>
+          <div className="pt-1 text-center space-y-2">
+            <p className="text-sm text-muted-foreground">Don't have a plan yet?</p>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full h-11 font-semibold"
+              onClick={() => navigate("/plans")}
+            >
+              Subscribe
+            </Button>
+          </div>
           <p className="text-xs text-center text-muted-foreground pt-2">
             Credentials are validated against the Prime Cinema API.
           </p>
