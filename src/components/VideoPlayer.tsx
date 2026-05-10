@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { X, Play, Pause, Volume2, VolumeX, Loader2, RotateCcw, RotateCw, Maximize2, Minimize2 } from "lucide-react";
+import { X, Play, Pause, Volume2, VolumeX, Loader2, RotateCcw, RotateCw, Maximize2, Minimize2, Expand, Shrink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { VodStream } from "@/lib/xtream";
 import { getProgress, saveProgress } from "@/lib/watchProgress";
@@ -25,6 +25,7 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
   const [showControls, setShowControls] = useState(true);
   const hideTimer = useRef<number | null>(null);
   const [fitMode, setFitMode] = useState<"contain" | "cover">("contain");
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const resumedRef = useRef(false);
   const lastSaveRef = useRef(0);
 
@@ -55,6 +56,29 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
+
+  // Track fullscreen state for the enlarge button
+  useEffect(() => {
+    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onFsChange);
+    return () => document.removeEventListener("fullscreenchange", onFsChange);
+  }, []);
+
+  const toggleFullscreen = async () => {
+    const el = containerRef.current;
+    if (!el) return;
+    try {
+      if (!document.fullscreenElement) {
+        const req = el.requestFullscreen?.bind(el) || (el as any).webkitRequestFullscreen?.bind(el);
+        await req?.();
+        const orientation = (screen as any).orientation;
+        try { await orientation?.lock?.("landscape"); } catch { /* ignore */ }
+      } else {
+        await document.exitFullscreen?.();
+      }
+    } catch { /* ignore */ }
+    bumpControls();
+  };
 
   const handleClose = async () => {
     // Save current position before closing
@@ -282,6 +306,17 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
                 {fitMode === "contain" ? <Maximize2 className="h-6 w-6" /> : <Minimize2 className="h-6 w-6" />}
                 <span className="hidden md:inline text-xs font-medium">
                   {fitMode === "contain" ? "Fit" : "Original"}
+                </span>
+              </button>
+              <button
+                onClick={toggleFullscreen}
+                className="text-white hover:text-primary transition-colors flex items-center gap-1.5"
+                aria-label={isFullscreen ? "Exit fullscreen" : "Enlarge to fullscreen"}
+                title={isFullscreen ? "Exit fullscreen" : "Enlarge"}
+              >
+                {isFullscreen ? <Shrink className="h-6 w-6" /> : <Expand className="h-6 w-6" />}
+                <span className="hidden md:inline text-xs font-medium">
+                  {isFullscreen ? "Exit" : "Enlarge"}
                 </span>
               </button>
             </div>
