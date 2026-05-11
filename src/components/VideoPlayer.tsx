@@ -70,7 +70,10 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
       video.load();
       player.attachMediaElement(video);
       player.load();
-      player.play().catch(() => {});
+      const playResult = player.play() as void | Promise<void>;
+      if (playResult && typeof (playResult as Promise<void>).catch === "function") {
+        (playResult as Promise<void>).catch(() => {});
+      }
       mpegtsPlayerRef.current = player;
 
       player.on(mpegts.Events.ERROR, () => {
