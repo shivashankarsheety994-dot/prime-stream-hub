@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import { CinemaLoader } from "@/components/CinemaLoader";
 import { useAuth } from "@/context/AuthContext";
 import { Header } from "@/components/Header";
-import { HeroBillboard } from "@/components/HeroBillboard";
+import { PosterMarquee } from "@/components/PosterMarquee";
 import { GenreRow } from "@/components/GenreRow";
 import { getVodCategories, getVodStreams, VodCategory, VodStream } from "@/lib/xtream";
 import { getContinueWatching, WatchEntry } from "@/lib/watchProgress";
@@ -85,8 +85,8 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <HeroBillboard movies={latest.length ? latest : streams} />
-      <main className="pb-16 -mt-24 md:-mt-32 relative z-10 space-y-2">
+      <PosterMarquee movies={latest.length ? latest : streams} />
+      <main className="pb-16 -mt-8 relative z-10">
         {dataLoading ? (
           <CinemaLoader label="Loading movies" />
         ) : streams.length === 0 ? (
