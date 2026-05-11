@@ -3,6 +3,7 @@ import { X, Play, Pause, Volume2, VolumeX, Loader2, RotateCcw, RotateCw, Maximiz
 import { Button } from "@/components/ui/button";
 import { VodStream } from "@/lib/xtream";
 import { getProgress, saveProgress } from "@/lib/watchProgress";
+import mpegts from "mpegts.js";
 
 interface Props {
   src: string;
@@ -28,6 +29,68 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const resumedRef = useRef(false);
   const lastSaveRef = useRef(0);
+  const mpegtsPlayerRef = useRef<mpegts.Player | null>(null);
+
+  // Attach mpegts.js for TS/MKV/FLV streams that need extra demuxing.
+  // Browsers cannot decode AC3/EAC3/DTS audio natively due to licensing —
+  // mpegts.js gives us a better shot at MPEG-TS containers, but tracks
+  // using those codecs may still be silent.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !src) return;
+
+    const lower = src.split("?")[0].toLowerCase();
+    const isTs = /\.(ts|m2ts|mts)$/.test(lower);
+    const isMkv = /\.(mkv|mka)$/.test(lower);
+    const isFlv = /\.flv$/.test(lower);
+
+    if (!mpegts.getFeatureList().mseLivePlayback) {
+      // MSE not supported; fall back to native <video src>.
+      return;
+    }
+
+    if (!isTs && !isMkv && !isFlv) return;
+
+    try {
+      const player = mpegts.createPlayer(
+        {
+          type: isFlv ? "flv" : "mpegts",
+          isLive: false,
+          url: src,
+        },
+        {
+          enableWorker: true,
+          enableStashBuffer: false,
+          lazyLoad: false,
+          autoCleanupSourceBuffer: true,
+        },
+      );
+      // Detach native src so the two engines don't fight.
+      video.removeAttribute("src");
+      video.load();
+      player.attachMediaElement(video);
+      player.load();
+      player.play().catch(() => {});
+      mpegtsPlayerRef.current = player;
+
+      player.on(mpegts.Events.ERROR, () => {
+        setError("This stream uses an audio/video codec your browser can't decode (e.g. AC3, EAC3, DTS).");
+      });
+    } catch {
+      // Ignore and fall back to native playback.
+    }
+
+    return () => {
+      const p = mpegtsPlayerRef.current;
+      if (p) {
+        try { p.pause(); } catch { /* ignore */ }
+        try { p.unload(); } catch { /* ignore */ }
+        try { p.detachMediaElement(); } catch { /* ignore */ }
+        try { p.destroy(); } catch { /* ignore */ }
+        mpegtsPlayerRef.current = null;
+      }
+    };
+  }, [src]);
 
   // Lock scroll while open
   useEffect(() => {
