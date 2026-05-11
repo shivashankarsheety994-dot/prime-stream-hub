@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { VodStream } from "@/lib/xtream";
 import { getProgress, saveProgress } from "@/lib/watchProgress";
 import mpegts from "mpegts.js";
+import videojs from "video.js";
+import type Player from "video.js/dist/types/player";
+import "video.js/dist/video-js.css";
 
 interface Props {
   src: string;
@@ -30,6 +33,31 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
   const resumedRef = useRef(false);
   const lastSaveRef = useRef(0);
   const mpegtsPlayerRef = useRef<mpegts.Player | null>(null);
+  const vjsRef = useRef<Player | null>(null);
+
+  // Initialise video.js once on mount; tear down on unmount.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || vjsRef.current) return;
+    const player = videojs(video, {
+      controls: false, // we render our own overlay
+      autoplay: true,
+      preload: "auto",
+      fluid: false,
+      fill: true,
+      playsinline: true,
+      html5: {
+        vhs: { overrideNative: true },
+        nativeAudioTracks: false,
+        nativeVideoTracks: false,
+      },
+    });
+    vjsRef.current = player;
+    return () => {
+      try { player.dispose(); } catch { /* ignore */ }
+      vjsRef.current = null;
+    };
+  }, []);
 
   // Attach mpegts.js for TS/MKV/FLV streams that need extra demuxing.
   // Browsers cannot decode AC3/EAC3/DTS audio natively due to licensing —
