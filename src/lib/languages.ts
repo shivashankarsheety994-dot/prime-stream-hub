@@ -11,6 +11,7 @@ export const LANGUAGES: LanguageDef[] = [
   { slug: "kannada", native: "ಕನ್ನಡ", english: "Kannada", keywords: ["kannada"] },
   { slug: "tamil", native: "தமிழ்", english: "Tamil", keywords: ["tamil"] },
   { slug: "telugu", native: "తెలుగు", english: "Telugu", keywords: ["telugu"] },
+  { slug: "hindi", native: "हिन्दी", english: "Hindi", keywords: ["hindi", "bollywood"] },
   { slug: "english", native: "English", english: "English", keywords: ["english", "hollywood"] },
   { slug: "malayalam", native: "മലയാളം", english: "Malayalam", keywords: ["malayalam"] },
 ];
