@@ -42,7 +42,11 @@ export default function Index() {
   }, [credentials]);
 
   const latest = useMemo(() => {
-    const sorted = [...streams].sort((a, b) => b.stream_id - a.stream_id);
+    const sorted = [...streams].sort((a, b) => {
+      const aT = a.added ? parseInt(a.added, 10) : 0;
+      const bT = b.added ? parseInt(b.added, 10) : 0;
+      return bT - aT;
+    });
     return sorted.slice(0, 30);
   }, [streams]);
 
@@ -55,7 +59,11 @@ export default function Index() {
     });
     // Sort each category by most-recently-added first
     map.forEach((list) => {
-      list.sort((a, b) => b.stream_id - a.stream_id);
+      list.sort((a, b) => {
+        const aT = a.added ? parseInt(a.added, 10) : 0;
+        const bT = b.added ? parseInt(b.added, 10) : 0;
+        return bT - aT;
+      });
     });
     return map;
   }, [streams]);
@@ -65,7 +73,8 @@ export default function Index() {
     const recencyOf = (catId: string) => {
       const list = byCategory.get(catId);
       if (!list || list.length === 0) return 0;
-      return list[0].stream_id;
+      const newestMovie = list[0];
+      return newestMovie.added ? parseInt(newestMovie.added, 10) : 0;
     };
     return [...categories]
       .sort((a, b) => recencyOf(b.category_id) - recencyOf(a.category_id));
