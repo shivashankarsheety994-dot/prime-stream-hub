@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Header } from "@/components/Header";
 import { PosterMarquee } from "@/components/PosterMarquee";
 import { GenreRow } from "@/components/GenreRow";
+import { Top5Row } from "@/components/Top5Row";
 import { getVodCategories, getVodStreams, VodCategory, VodStream } from "@/lib/xtream";
 import { getContinueWatching, WatchEntry } from "@/lib/watchProgress";
 
@@ -96,6 +97,7 @@ export default function Index() {
           </div>
         ) : (
           <>
+            <Top5Row movies={latest.slice(0, 5)} />
             {continueWatching.length > 0 && (
               <GenreRow
                 title="Continue Watching"
