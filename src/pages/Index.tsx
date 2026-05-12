@@ -6,7 +6,7 @@ import { Header } from "@/components/Header";
 import { PosterMarquee } from "@/components/PosterMarquee";
 import { GenreRow } from "@/components/GenreRow";
 import { Top5Row } from "@/components/Top5Row";
-import { LanguageGrid } from "@/components/LanguageGrid";
+import { LanguageCards } from "@/components/LanguageCards";
 import { getVodCategories, getVodStreams, VodCategory, VodStream } from "@/lib/xtream";
 import { getContinueWatching, WatchEntry } from "@/lib/watchProgress";
 
@@ -79,30 +79,6 @@ export default function Index() {
     return [...categories].sort((a, b) => recencyOf(b.category_id) - recencyOf(a.category_id));
   }, [categories, byCategory]);
 
-  const languageSections = useMemo(() => {
-    const langs: { native: string; english: string; keywords: string[] }[] = [
-      { native: "ಕನ್ನಡ", english: "Kannada", keywords: ["kannada"] },
-      { native: "தமிழ்", english: "Tamil", keywords: ["tamil"] },
-      { native: "తెలుగు", english: "Telugu", keywords: ["telugu"] },
-      { native: "English", english: "English", keywords: ["english", "hollywood"] },
-      { native: "മലയാളം", english: "Malayalam", keywords: ["malayalam"] },
-    ];
-    const catNameById = new Map(categories.map((c) => [c.category_id, c.category_name.toLowerCase()]));
-    return langs.map((l) => {
-      const matches = streams.filter((s) => {
-        const catName = s.category_id ? catNameById.get(s.category_id) ?? "" : "";
-        const name = s.name.toLowerCase();
-        return l.keywords.some((k) => catName.includes(k) || name.includes(k));
-      });
-      matches.sort((a, b) => {
-        const aT = a.added ? parseInt(a.added, 10) : 0;
-        const bT = b.added ? parseInt(b.added, 10) : 0;
-        return bT - aT;
-      });
-      return { ...l, movies: matches };
-    });
-  }, [streams, categories]);
-
   if (loading) {
     return <CinemaLoader fullscreen />;
   }
@@ -129,14 +105,7 @@ export default function Index() {
                 movies={continueWatching.map((e) => e.movie)}
               />
             )}
-            {languageSections.map((l) => (
-              <LanguageGrid
-                key={l.english}
-                nativeLabel={l.native}
-                englishLabel={l.english}
-                movies={l.movies}
-              />
-            ))}
+            <LanguageCards streams={streams} categories={categories} />
             {orderedCategories.map((cat) => (
               <GenreRow
                 key={cat.category_id}
