@@ -51,34 +51,60 @@ export default function Index() {
   }, [streams]);
 
   const byCategory = useMemo(() => {
-    const map = new Map<string, VodStream[]>();
+    const moviesByCatName = new Map<string, VodStream[]>();
+    const catNameMap = new Map<string, string>();
+    categories.forEach(c => catNameMap.set(c.category_id, c.category_name));
+
+    // Map from normalized name to original name to preserve original casing
+    const normalizedToOriginal = new Map<string, string>();
+
     streams.forEach((s) => {
-      const id = s.category_id ?? "uncat";
-      if (!map.has(id)) map.set(id, []);
-      map.get(id)!.push(s);
+      const originalCatName = (s.category_id && catNameMap.get(s.category_id)) || "Uncategorized";
+      const normalized = originalCatName.trim().toLowerCase();
+      
+      if(!moviesByCatName.has(normalized)) {
+        moviesByCatName.set(normalized, []);
+        normalizedToOriginal.set(normalized, originalCatName.trim());
+      }
+      moviesByCatName.get(normalized)!.push(s);
     });
-    // Sort each category by most-recently-added first
-    map.forEach((list) => {
+
+    // Sort movies within each category
+    moviesByCatName.forEach((list) => {
       list.sort((a, b) => {
         const aT = a.added ? parseInt(a.added, 10) : 0;
         const bT = b.added ? parseInt(b.added, 10) : 0;
         return bT - aT;
       });
     });
-    return map;
-  }, [streams]);
 
-  // Order categories by their most recent addition (newest first)
+    // Now, let's rebuild the map with original names as keys.
+    const finalMap = new Map<string, VodStream[]>();
+    for (const [normalized, movies] of moviesByCatName.entries()) {
+      const originalName = normalizedToOriginal.get(normalized) || normalized;
+      finalMap.set(originalName, movies);
+    }
+    
+    return finalMap;
+  }, [streams, categories]);
+
   const orderedCategories = useMemo(() => {
-    const recencyOf = (catId: string) => {
-      const list = byCategory.get(catId);
-      if (!list || list.length === 0) return 0;
-      const newestMovie = list[0];
-      return newestMovie.added ? parseInt(newestMovie.added, 10) : 0;
-    };
-    return [...categories]
-      .sort((a, b) => recencyOf(b.category_id) - recencyOf(a.category_id));
-  }, [categories, byCategory]);
+    const unsorted = Array.from(byCategory.entries())
+      .map(([name, movies]) => ({
+        name,
+        movies,
+        recency: movies.length > 0 && movies[0].added ? parseInt(movies[0].added, 10) : 0,
+      }));
+    
+    const uncat = unsorted.find(c => c.name === "Uncategorized");
+    const sorted = unsorted.filter(c => c.name !== "Uncategorized").sort((a, b) => b.recency - a.recency);
+
+    if (uncat) {
+        sorted.push(uncat);
+    }
+    
+    return sorted;
+  }, [byCategory]);
 
   if (loading) {
     return <CinemaLoader fullscreen />;
@@ -106,16 +132,13 @@ export default function Index() {
                 movies={continueWatching.map((e) => e.movie)}
               />
             )}
-            {orderedCategories.map((cat) => (
+            {orderedCategories.map((cat, i) => (
               <GenreRow
-                key={cat.category_id}
-                title={cat.category_name}
-                movies={byCategory.get(cat.category_id) ?? []}
+                key={`${cat.name}-${i}`}
+                title={cat.name}
+                movies={cat.movies}
               />
             ))}
-            {byCategory.has("uncat") && (
-              <GenreRow title="More Movies" movies={byCategory.get("uncat")!} />
-            )}
           </>
         )}
       </main>
