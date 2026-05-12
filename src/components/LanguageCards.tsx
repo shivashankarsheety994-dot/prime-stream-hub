@@ -19,9 +19,11 @@ export function LanguageCards({ streams, categories }: Props) {
   return (
     <section className="py-4 md:py-6 px-4 md:px-8">
       <h3 className="text-xl md:text-2xl font-bold mb-3 tracking-wide">Browse by Language</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
+      <div className="flex gap-3 md:gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-4 md:-mx-8 px-4 md:px-8 snap-x snap-mandatory">
         {available.map(({ lang, count }) => (
-          <LanguageCard key={lang.slug} lang={lang} count={count} />
+          <div key={lang.slug} className="snap-start flex-shrink-0 w-40 md:w-48">
+            <LanguageCard lang={lang} count={count} />
+          </div>
         ))}
       </div>
     </section>
@@ -32,7 +34,7 @@ function LanguageCard({ lang, count }: { lang: LanguageDef; count: number }) {
   return (
     <Link
       to={`/language/${lang.slug}`}
-      className="group relative aspect-square rounded-lg overflow-hidden bg-white shadow-md hover:shadow-xl transition-all hover:scale-[1.03] flex flex-col items-center justify-center p-4 text-center"
+      className="group relative aspect-square w-full rounded-lg overflow-hidden bg-white shadow-md hover:shadow-xl transition-all hover:scale-[1.03] flex flex-col items-center justify-center p-4 text-center"
       aria-label={`Browse ${lang.english} movies`}
     >
       <span
