@@ -9,6 +9,7 @@ import { Top5Row } from "@/components/Top5Row";
 import { LanguageCards } from "@/components/LanguageCards";
 import { getVodCategories, getVodStreams, VodCategory, VodStream } from "@/lib/xtream";
 import { getContinueWatching, WatchEntry } from "@/lib/watchProgress";
+import { LANGUAGES } from "@/lib/languages";
 
 export default function Index() {
   const { user, credentials, loading } = useAuth();
@@ -76,7 +77,14 @@ export default function Index() {
       if (!list || list.length === 0) return 0;
       return list[0].added ? parseInt(list[0].added, 10) : 0;
     };
-    return [...categories].sort((a, b) => recencyOf(b.category_id) - recencyOf(a.category_id));
+    const langKeywords = LANGUAGES.flatMap((l) => l.keywords);
+    const isLanguageCat = (name: string) => {
+      const n = name.toLowerCase();
+      return langKeywords.some((k) => n.includes(k));
+    };
+    return [...categories]
+      .filter((c) => !isLanguageCat(c.category_name))
+      .sort((a, b) => recencyOf(b.category_id) - recencyOf(a.category_id));
   }, [categories, byCategory]);
 
   if (loading) {
