@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound.tsx";
 import Login from "./pages/Login.tsx";
 import Account from "./pages/Account.tsx";
 import Plans from "./pages/Plans.tsx";
+import Language from "./pages/Language.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import { PlayerProvider } from "./context/PlayerContext.tsx";
 import { PortraitGate } from "./components/PortraitGate.tsx";
@@ -27,6 +28,7 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/account" element={<Account />} />
               <Route path="/plans" element={<Plans />} />
+              <Route path="/language/:slug" element={<Language />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
