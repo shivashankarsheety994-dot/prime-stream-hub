@@ -159,6 +159,8 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
       .then((started) => {
         if (!started) return;
         castStartedRef.current = true;
+        castTimelineStartRef.current = Date.now();
+        castStartPositionRef.current = startTime;
         videoRef.current?.pause();
         setPlaying(true);
         setLoading(false);
