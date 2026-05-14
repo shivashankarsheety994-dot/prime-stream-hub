@@ -1,6 +1,6 @@
 {
-  "name": "Prime Cinema",
-  "short_name": "Prime Cinema",
+  "name": "Primeflex",
+  "short_name": "Primeflex",
   "description": "Stream the latest movies across every genre.",
   "start_url": "/",
   "scope": "/",
