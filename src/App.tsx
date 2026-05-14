@@ -11,6 +11,7 @@ import Plans from "./pages/Plans.tsx";
 import Language from "./pages/Language.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import { PlayerProvider } from "./context/PlayerContext.tsx";
+import { CastProvider } from "./context/CastContext.tsx";
 import { PortraitGate } from "./components/PortraitGate.tsx";
 
 const queryClient = new QueryClient();
@@ -22,18 +23,20 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <PlayerProvider>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/account" element={<Account />} />
-              <Route path="/plans" element={<Plans />} />
-              <Route path="/language/:slug" element={<Language />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <PortraitGate />
-          </PlayerProvider>
+          <CastProvider>
+            <PlayerProvider>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/account" element={<Account />} />
+                <Route path="/plans" element={<Plans />} />
+                <Route path="/language/:slug" element={<Language />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <PortraitGate />
+            </PlayerProvider>
+          </CastProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
