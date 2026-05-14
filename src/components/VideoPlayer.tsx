@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { X, Play, Pause, Volume2, VolumeX, Loader2, RotateCcw, RotateCw, Maximize2, Minimize2, Expand, Shrink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCast } from "@/context/CastContext";
 import { VodStream } from "@/lib/xtream";
 import { getProgress, saveProgress } from "@/lib/watchProgress";
 
@@ -12,9 +13,19 @@ interface Props {
   onClose: () => void;
 }
 
+type FullscreenContainer = HTMLDivElement & {
+  webkitRequestFullscreen?: () => Promise<void> | void;
+};
+
+type LockableOrientation = ScreenOrientation & {
+  lock?: (orientation: OrientationLockType) => Promise<void>;
+  unlock?: () => void;
+};
+
 export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { connected: castConnected, castMovie, playRemote, pauseRemote, seekRemote } = useCast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [playing, setPlaying] = useState(true);
@@ -27,7 +38,19 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
   const [fitMode, setFitMode] = useState<"contain" | "cover">("contain");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const resumedRef = useRef(false);
+  const castStartedRef = useRef(false);
+  const castTimelineStartRef = useRef(0);
+  const castStartPositionRef = useRef(0);
   const lastSaveRef = useRef(0);
+
+  const seek = useCallback((delta: number) => {
+    const v = videoRef.current; if (!v) return;
+    const nextTime = Math.max(0, Math.min((v.duration || duration || 0), v.currentTime + delta));
+    if (castConnected && castStartedRef.current) seekRemote(nextTime);
+    castTimelineStartRef.current = Date.now();
+    castStartPositionRef.current = nextTime;
+    v.currentTime = nextTime;
+  }, [castConnected, duration, seekRemote]);
 
   // Lock scroll while open
   useEffect(() => {
@@ -43,9 +66,9 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     const el = containerRef.current;
     if (!el) return;
     const req = el.requestFullscreen?.bind(el)
-      || (el as any).webkitRequestFullscreen?.bind(el);
+      || (el as FullscreenContainer).webkitRequestFullscreen?.bind(el);
     req?.()?.then(() => {
-      const orientation = (screen as any).orientation;
+      const orientation = screen.orientation as LockableOrientation | undefined;
       orientation?.lock?.("landscape").catch(() => {});
     }).catch(() => {});
   }, []);
@@ -69,9 +92,9 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     if (!el) return;
     try {
       if (!document.fullscreenElement) {
-        const req = el.requestFullscreen?.bind(el) || (el as any).webkitRequestFullscreen?.bind(el);
+        const req = el.requestFullscreen?.bind(el) || (el as FullscreenContainer).webkitRequestFullscreen?.bind(el);
         await req?.();
-        const orientation = (screen as any).orientation;
+        const orientation = screen.orientation as LockableOrientation | undefined;
         try { await orientation?.lock?.("landscape"); } catch { /* ignore */ }
       } else {
         await document.exitFullscreen?.();
@@ -89,7 +112,7 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     if (document.fullscreenElement) {
       try { await document.exitFullscreen?.(); } catch {/* ignore */}
     }
-    const orientation = (screen as any).orientation;
+    const orientation = screen.orientation as LockableOrientation | undefined;
     try { await orientation?.lock?.("portrait"); } catch { /* ignore */ }
     try { orientation?.unlock?.(); } catch { /* ignore */ }
     onClose();
@@ -100,7 +123,7 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     return () => {
       const v = videoRef.current;
       if (v && v.duration) saveProgress(movie, v.currentTime, v.duration);
-      const orientation = (screen as any).orientation;
+      const orientation = screen.orientation as LockableOrientation | undefined;
       try { orientation?.lock?.("portrait").catch?.(() => {}); } catch { /* ignore */ }
       try { orientation?.unlock?.(); } catch { /* ignore */ }
       if (document.fullscreenElement) {
@@ -109,8 +132,87 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     };
   }, [movie]);
 
+  useEffect(() => {
+    const mediaSession = "mediaSession" in navigator ? navigator.mediaSession : undefined;
+    if (!mediaSession) return;
+
+    mediaSession.metadata = new MediaMetadata({
+      title: castConnected ? `Casting ${title}` : title,
+      artist: castConnected ? "Connected Chromecast" : "Primeflix",
+      album: "Primeflix",
+      artwork: poster ? [
+        { src: poster, sizes: "96x96", type: "image/png" },
+        { src: poster, sizes: "256x256", type: "image/png" },
+        { src: poster, sizes: "512x512", type: "image/png" },
+      ] : undefined,
+    });
+
+    mediaSession.setActionHandler("play", () => {
+      if (castConnected && castStartedRef.current) playRemote();
+      else videoRef.current?.play();
+      setPlaying(true);
+    });
+    mediaSession.setActionHandler("pause", () => {
+      if (castConnected && castStartedRef.current) pauseRemote();
+      else videoRef.current?.pause();
+      setPlaying(false);
+    });
+    mediaSession.setActionHandler("seekbackward", () => seek(-10));
+    mediaSession.setActionHandler("seekforward", () => seek(10));
+    mediaSession.setActionHandler("seekto", (details) => {
+      if (typeof details.seekTime !== "number") return;
+      if (castConnected && castStartedRef.current) seekRemote(details.seekTime);
+      if (videoRef.current) videoRef.current.currentTime = details.seekTime;
+    });
+
+    return () => {
+      mediaSession.metadata = null;
+    };
+  }, [castConnected, pauseRemote, playRemote, poster, seek, seekRemote, title]);
+
+  useEffect(() => {
+    if (!castConnected || !src || castStartedRef.current) return;
+    const startTime = videoRef.current?.currentTime || getProgress(movie.stream_id)?.position || 0;
+    castMovie({ movie, src, title, poster, startTime })
+      .then((started) => {
+        if (!started) return;
+        castStartedRef.current = true;
+        castTimelineStartRef.current = Date.now();
+        castStartPositionRef.current = startTime;
+        videoRef.current?.pause();
+        setPlaying(true);
+        setLoading(false);
+      })
+      .catch(() => {});
+  }, [castConnected, castMovie, movie, poster, src, title]);
+
+  useEffect(() => {
+    if (!castConnected || !castStartedRef.current || !("mediaSession" in navigator) || !duration) return;
+    const updateCastPosition = () => {
+      const elapsed = playing ? (Date.now() - castTimelineStartRef.current) / 1000 : 0;
+      const position = Math.min(duration, castStartPositionRef.current + elapsed);
+      setProgress((position / duration) * 100);
+      try {
+        navigator.mediaSession.setPositionState({ duration, playbackRate: playing ? 1 : 0, position });
+      } catch { /* ignore */ }
+    };
+    updateCastPosition();
+    const id = window.setInterval(updateCastPosition, 1000);
+    return () => window.clearInterval(id);
+  }, [castConnected, duration, playing]);
+
   const togglePlay = () => {
     const v = videoRef.current; if (!v) return;
+    if (castConnected && castStartedRef.current) {
+      if (playing) {
+        pauseRemote();
+        setPlaying(false);
+      } else {
+        playRemote();
+        setPlaying(true);
+      }
+      return;
+    }
     if (v.paused) { v.play(); } else { v.pause(); }
   };
 
@@ -120,15 +222,14 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     setMuted(v.muted);
   };
 
-  const seek = (delta: number) => {
-    const v = videoRef.current; if (!v) return;
-    v.currentTime = Math.max(0, Math.min((v.duration || 0), v.currentTime + delta));
-  };
-
   const onSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = videoRef.current; if (!v || !v.duration) return;
     const pct = Number(e.target.value);
-    v.currentTime = (pct / 100) * v.duration;
+    const nextTime = (pct / 100) * v.duration;
+    if (castConnected && castStartedRef.current) seekRemote(nextTime);
+    castTimelineStartRef.current = Date.now();
+    castStartPositionRef.current = nextTime;
+    v.currentTime = nextTime;
     setProgress(pct);
   };
 
@@ -189,6 +290,11 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
           onTimeUpdate={(e) => {
             const v = e.currentTarget;
             if (v.duration) setProgress((v.currentTime / v.duration) * 100);
+            if ("mediaSession" in navigator && v.duration) {
+              try {
+                navigator.mediaSession.setPositionState({ duration: v.duration, playbackRate: 1, position: v.currentTime });
+              } catch { /* ignore */ }
+            }
             // Save every 5 seconds
             const now = Date.now();
             if (v.duration && now - lastSaveRef.current > 5000) {
