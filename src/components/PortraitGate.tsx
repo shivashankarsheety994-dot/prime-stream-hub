@@ -11,7 +11,7 @@ export function PortraitGate() {
       <Smartphone className="h-12 w-12 text-primary animate-pulse" />
       <h2 className="text-xl font-bold tracking-wide">Please rotate to portrait</h2>
       <p className="text-sm text-muted-foreground max-w-xs">
-        Prime Cinema is designed for portrait mode. Videos will automatically rotate to landscape when playing.
+        Primeflex is designed for portrait mode. Videos will automatically rotate to landscape when playing.
       </p>
     </div>
   );
