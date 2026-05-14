@@ -1,11 +1,54 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { VodStream } from "@/lib/xtream";
 
+interface CastDeviceInfo { friendlyName?: string }
+interface CastSessionObj { receiver?: CastDeviceInfo }
+interface CastMediaInfo { metadata?: CastMetadata; streamType?: string }
+interface CastMetadata { title?: string; images?: CastImage[] }
+interface CastImage { src?: string }
+interface CastLoadRequest { autoplay?: boolean; currentTime?: number }
+interface CastSeekRequest { currentTime?: number }
+interface RemoteMediaSession {
+  play?: (request?: unknown, success?: () => void, error?: (err: unknown) => void) => void;
+  pause?: (request?: unknown, success?: () => void, error?: (err: unknown) => void) => void;
+  seek?: (request: CastSeekRequest, success?: () => void, error?: (err: unknown) => void) => void;
+}
+interface CastSession {
+  getCastDevice?: () => CastDeviceInfo;
+  getSessionObj?: () => CastSessionObj;
+  getMediaSession?: () => RemoteMediaSession | null;
+  loadMedia: (request: CastLoadRequest) => Promise<void>;
+}
+interface CastContextInstance {
+  setOptions: (options: { receiverApplicationId: string; autoJoinPolicy: string }) => void;
+  addEventListener: (type: string, handler: () => void) => void;
+  getCurrentSession: () => CastSession | null;
+  requestSession: () => Promise<CastSession>;
+}
+interface CastFrameworkApi {
+  CastContext: { getInstance: () => CastContextInstance };
+  CastContextEventType: { SESSION_STATE_CHANGED: string };
+}
+interface ChromeCastApi {
+  cast?: {
+    AutoJoinPolicy: { ORIGIN_SCOPED: string };
+    media: {
+      DEFAULT_MEDIA_RECEIVER_APP_ID: string;
+      StreamType: { BUFFERED: string };
+      Image: new (src: string) => CastImage;
+      LoadRequest: new (mediaInfo: CastMediaInfo) => CastLoadRequest;
+      MediaInfo: new (src: string, contentType: string) => CastMediaInfo;
+      MovieMediaMetadata: new () => CastMetadata;
+      SeekRequest: new () => CastSeekRequest;
+    };
+  };
+}
+
 declare global {
   interface Window {
     __onGCastApiAvailable?: (available: boolean) => void;
-    cast?: any;
-    chrome?: any;
+    cast?: { framework?: CastFrameworkApi };
+    chrome?: ChromeCastApi;
   }
 }
 
