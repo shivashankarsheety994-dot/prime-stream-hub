@@ -32,10 +32,10 @@ interface CastFrameworkApi {
 interface ChromeCastApi {
   cast?: {
     AutoJoinPolicy: { ORIGIN_SCOPED: string };
+    Image: new (src: string) => CastImage;
     media: {
       DEFAULT_MEDIA_RECEIVER_APP_ID: string;
       StreamType: { BUFFERED: string };
-      Image: new (src: string) => CastImage;
       LoadRequest: new (mediaInfo: CastMediaInfo) => CastLoadRequest;
       MediaInfo: new (src: string, contentType: string) => CastMediaInfo;
       MovieMediaMetadata: new () => CastMetadata;
