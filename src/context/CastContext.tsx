@@ -85,13 +85,15 @@ export function CastProvider({ children }: { children: ReactNode }) {
     return castContext?.getCurrentSession?.()?.getMediaSession?.();
   }, []);
 
-  const castMovie = useCallback(async ({ src, title, poster, startTime = 0 }: CastMediaPayload) => {
+  const castMovie = useCallback(async ({ movie, src, title, poster, startTime = 0 }: CastMediaPayload) => {
     const castContext = window.cast?.framework?.CastContext?.getInstance?.();
     if (!castContext || !window.chrome?.cast?.media) return false;
     const session = castContext.getCurrentSession?.() || await castContext.requestSession();
     if (!session) return false;
 
-    const mediaInfo = new window.chrome.cast.media.MediaInfo(src, "video/mp4");
+    const ext = (movie.container_extension || src.split(".").pop() || "mp4").toLowerCase().split("?")[0];
+    const contentType = ext === "m3u8" ? "application/x-mpegURL" : ext === "webm" ? "video/webm" : "video/mp4";
+    const mediaInfo = new window.chrome.cast.media.MediaInfo(src, contentType);
     const metadata = new window.chrome.cast.media.MovieMediaMetadata();
     metadata.title = title;
     if (poster) metadata.images = [new window.chrome.cast.Image(poster)];
