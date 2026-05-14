@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { X, Play, Pause, Volume2, VolumeX, Loader2, RotateCcw, RotateCw, Maximize2, Minimize2, Expand, Shrink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCast } from "@/context/CastContext";
 import { VodStream } from "@/lib/xtream";
 import { getProgress, saveProgress } from "@/lib/watchProgress";
 
@@ -15,6 +16,7 @@ interface Props {
 export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { connected: castConnected, castMovie, playRemote, pauseRemote, seekRemote } = useCast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [playing, setPlaying] = useState(true);
@@ -27,6 +29,7 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
   const [fitMode, setFitMode] = useState<"contain" | "cover">("contain");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const resumedRef = useRef(false);
+  const castStartedRef = useRef(false);
   const lastSaveRef = useRef(0);
 
   // Lock scroll while open
@@ -111,6 +114,16 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
 
   const togglePlay = () => {
     const v = videoRef.current; if (!v) return;
+    if (castConnected && castStartedRef.current) {
+      if (playing) {
+        pauseRemote();
+        setPlaying(false);
+      } else {
+        playRemote();
+        setPlaying(true);
+      }
+      return;
+    }
     if (v.paused) { v.play(); } else { v.pause(); }
   };
 
@@ -122,13 +135,17 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
 
   const seek = (delta: number) => {
     const v = videoRef.current; if (!v) return;
-    v.currentTime = Math.max(0, Math.min((v.duration || 0), v.currentTime + delta));
+    const nextTime = Math.max(0, Math.min((v.duration || duration || 0), v.currentTime + delta));
+    if (castConnected && castStartedRef.current) seekRemote(nextTime);
+    v.currentTime = nextTime;
   };
 
   const onSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = videoRef.current; if (!v || !v.duration) return;
     const pct = Number(e.target.value);
-    v.currentTime = (pct / 100) * v.duration;
+    const nextTime = (pct / 100) * v.duration;
+    if (castConnected && castStartedRef.current) seekRemote(nextTime);
+    v.currentTime = nextTime;
     setProgress(pct);
   };
 
