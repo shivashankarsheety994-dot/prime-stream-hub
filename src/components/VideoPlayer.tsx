@@ -13,6 +13,15 @@ interface Props {
   onClose: () => void;
 }
 
+type FullscreenContainer = HTMLDivElement & {
+  webkitRequestFullscreen?: () => Promise<void> | void;
+};
+
+type LockableOrientation = ScreenOrientation & {
+  lock?: (orientation: OrientationLockType) => Promise<void>;
+  unlock?: () => void;
+};
+
 export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -48,9 +57,9 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     const el = containerRef.current;
     if (!el) return;
     const req = el.requestFullscreen?.bind(el)
-      || (el as any).webkitRequestFullscreen?.bind(el);
+      || (el as FullscreenContainer).webkitRequestFullscreen?.bind(el);
     req?.()?.then(() => {
-      const orientation = (screen as any).orientation;
+      const orientation = screen.orientation as LockableOrientation | undefined;
       orientation?.lock?.("landscape").catch(() => {});
     }).catch(() => {});
   }, []);
@@ -74,9 +83,9 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     if (!el) return;
     try {
       if (!document.fullscreenElement) {
-        const req = el.requestFullscreen?.bind(el) || (el as any).webkitRequestFullscreen?.bind(el);
+        const req = el.requestFullscreen?.bind(el) || (el as FullscreenContainer).webkitRequestFullscreen?.bind(el);
         await req?.();
-        const orientation = (screen as any).orientation;
+        const orientation = screen.orientation as LockableOrientation | undefined;
         try { await orientation?.lock?.("landscape"); } catch { /* ignore */ }
       } else {
         await document.exitFullscreen?.();
@@ -94,7 +103,7 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     if (document.fullscreenElement) {
       try { await document.exitFullscreen?.(); } catch {/* ignore */}
     }
-    const orientation = (screen as any).orientation;
+    const orientation = screen.orientation as LockableOrientation | undefined;
     try { await orientation?.lock?.("portrait"); } catch { /* ignore */ }
     try { orientation?.unlock?.(); } catch { /* ignore */ }
     onClose();
@@ -105,7 +114,7 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     return () => {
       const v = videoRef.current;
       if (v && v.duration) saveProgress(movie, v.currentTime, v.duration);
-      const orientation = (screen as any).orientation;
+      const orientation = screen.orientation as LockableOrientation | undefined;
       try { orientation?.lock?.("portrait").catch?.(() => {}); } catch { /* ignore */ }
       try { orientation?.unlock?.(); } catch { /* ignore */ }
       if (document.fullscreenElement) {
