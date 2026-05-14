@@ -43,6 +43,15 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
   const castStartPositionRef = useRef(0);
   const lastSaveRef = useRef(0);
 
+  const seek = useCallback((delta: number) => {
+    const v = videoRef.current; if (!v) return;
+    const nextTime = Math.max(0, Math.min((v.duration || duration || 0), v.currentTime + delta));
+    if (castConnected && castStartedRef.current) seekRemote(nextTime);
+    castTimelineStartRef.current = Date.now();
+    castStartPositionRef.current = nextTime;
+    v.currentTime = nextTime;
+  }, [castConnected, duration, seekRemote]);
+
   // Lock scroll while open
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -159,7 +168,7 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     return () => {
       mediaSession.metadata = null;
     };
-  }, [castConnected, pauseRemote, playRemote, poster, seekRemote, title]);
+  }, [castConnected, pauseRemote, playRemote, poster, seek, seekRemote, title]);
 
   useEffect(() => {
     if (!castConnected || !src || castStartedRef.current) return;
@@ -211,15 +220,6 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     const v = videoRef.current; if (!v) return;
     v.muted = !v.muted;
     setMuted(v.muted);
-  };
-
-  const seek = (delta: number) => {
-    const v = videoRef.current; if (!v) return;
-    const nextTime = Math.max(0, Math.min((v.duration || duration || 0), v.currentTime + delta));
-    if (castConnected && castStartedRef.current) seekRemote(nextTime);
-    castTimelineStartRef.current = Date.now();
-    castStartPositionRef.current = nextTime;
-    v.currentTime = nextTime;
   };
 
   const onSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
