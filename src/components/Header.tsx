@@ -11,10 +11,10 @@ export function Header() {
       <div className="container mx-auto flex h-16 items-center px-4 md:px-8">
         <div className="w-32 hidden md:block" />
         <div className="flex-1 flex items-center justify-center gap-2">
-          <Link to="/" aria-label="Primeflex home" className="inline-flex items-center gap-2">
+          <Link to="/" aria-label="Primeflix home" className="inline-flex items-center gap-2">
             <Film className="h-6 w-6 text-primary" strokeWidth={2.5} />
             <h1 className="text-2xl md:text-3xl font-bold tracking-[0.2em] text-foreground">
-              PRIME<span className="text-primary">FLEX</span>
+              PRIME<span className="text-primary">FLIX</span>
             </h1>
           </Link>
         </div>
