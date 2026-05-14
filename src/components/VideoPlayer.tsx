@@ -208,6 +208,8 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     const v = videoRef.current; if (!v) return;
     const nextTime = Math.max(0, Math.min((v.duration || duration || 0), v.currentTime + delta));
     if (castConnected && castStartedRef.current) seekRemote(nextTime);
+    castTimelineStartRef.current = Date.now();
+    castStartPositionRef.current = nextTime;
     v.currentTime = nextTime;
   };
 
@@ -216,6 +218,8 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     const pct = Number(e.target.value);
     const nextTime = (pct / 100) * v.duration;
     if (castConnected && castStartedRef.current) seekRemote(nextTime);
+    castTimelineStartRef.current = Date.now();
+    castStartPositionRef.current = nextTime;
     v.currentTime = nextTime;
     setProgress(pct);
   };
