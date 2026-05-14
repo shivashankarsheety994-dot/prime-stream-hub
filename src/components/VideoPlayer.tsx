@@ -112,6 +112,58 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     };
   }, [movie]);
 
+  useEffect(() => {
+    const mediaSession = "mediaSession" in navigator ? navigator.mediaSession : undefined;
+    if (!mediaSession) return;
+
+    mediaSession.metadata = new MediaMetadata({
+      title: castConnected ? `Casting ${title}` : title,
+      artist: castConnected ? "Connected Chromecast" : "Primeflix",
+      album: "Primeflix",
+      artwork: poster ? [
+        { src: poster, sizes: "96x96", type: "image/png" },
+        { src: poster, sizes: "256x256", type: "image/png" },
+        { src: poster, sizes: "512x512", type: "image/png" },
+      ] : undefined,
+    });
+
+    mediaSession.setActionHandler("play", () => {
+      if (castConnected && castStartedRef.current) playRemote();
+      else videoRef.current?.play();
+      setPlaying(true);
+    });
+    mediaSession.setActionHandler("pause", () => {
+      if (castConnected && castStartedRef.current) pauseRemote();
+      else videoRef.current?.pause();
+      setPlaying(false);
+    });
+    mediaSession.setActionHandler("seekbackward", () => seek(-10));
+    mediaSession.setActionHandler("seekforward", () => seek(10));
+    mediaSession.setActionHandler("seekto", (details) => {
+      if (typeof details.seekTime !== "number") return;
+      if (castConnected && castStartedRef.current) seekRemote(details.seekTime);
+      if (videoRef.current) videoRef.current.currentTime = details.seekTime;
+    });
+
+    return () => {
+      mediaSession.metadata = null;
+    };
+  }, [castConnected, pauseRemote, playRemote, poster, seekRemote, title]);
+
+  useEffect(() => {
+    if (!castConnected || !src || castStartedRef.current) return;
+    const startTime = videoRef.current?.currentTime || getProgress(movie.stream_id)?.position || 0;
+    castMovie({ movie, src, title, poster, startTime })
+      .then((started) => {
+        if (!started) return;
+        castStartedRef.current = true;
+        videoRef.current?.pause();
+        setPlaying(true);
+        setLoading(false);
+      })
+      .catch(() => {});
+  }, [castConnected, castMovie, movie, poster, src, title]);
+
   const togglePlay = () => {
     const v = videoRef.current; if (!v) return;
     if (castConnected && castStartedRef.current) {
