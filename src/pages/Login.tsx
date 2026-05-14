@@ -45,12 +45,12 @@ export default function Login() {
         <div className="text-center mb-8">
           <img
             src={logo}
-            alt="Prime Cinema"
+            alt="Primeflex"
             width={1536}
             height={1024}
             className="mx-auto h-16 w-auto object-contain drop-shadow-[0_0_30px_hsl(var(--primary)/0.6)] mb-4"
           />
-          <h1 className="sr-only">Prime Cinema</h1>
+          <h1 className="sr-only">Primeflex</h1>
           <p className="text-muted-foreground">Sign in to continue streaming</p>
         </div>
         <form onSubmit={onSubmit} className="bg-card/80 backdrop-blur border border-border rounded-lg p-8 space-y-5 shadow-2xl">
@@ -87,7 +87,7 @@ export default function Login() {
             </Button>
           </div>
           <p className="text-xs text-center text-muted-foreground pt-2">
-            Credentials are validated against the Prime Cinema API.
+            Credentials are validated against the Primeflex API.
           </p>
         </form>
       </div>
