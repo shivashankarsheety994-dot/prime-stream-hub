@@ -30,6 +30,8 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const resumedRef = useRef(false);
   const castStartedRef = useRef(false);
+  const castTimelineStartRef = useRef(0);
+  const castStartPositionRef = useRef(0);
   const lastSaveRef = useRef(0);
 
   // Lock scroll while open
@@ -258,6 +260,11 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
           onTimeUpdate={(e) => {
             const v = e.currentTarget;
             if (v.duration) setProgress((v.currentTime / v.duration) * 100);
+            if ("mediaSession" in navigator && v.duration) {
+              try {
+                navigator.mediaSession.setPositionState({ duration: v.duration, playbackRate: 1, position: v.currentTime });
+              } catch { /* ignore */ }
+            }
             // Save every 5 seconds
             const now = Date.now();
             if (v.duration && now - lastSaveRef.current > 5000) {
