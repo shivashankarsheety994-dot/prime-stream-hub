@@ -168,6 +168,21 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
       .catch(() => {});
   }, [castConnected, castMovie, movie, poster, src, title]);
 
+  useEffect(() => {
+    if (!castConnected || !castStartedRef.current || !("mediaSession" in navigator) || !duration) return;
+    const updateCastPosition = () => {
+      const elapsed = playing ? (Date.now() - castTimelineStartRef.current) / 1000 : 0;
+      const position = Math.min(duration, castStartPositionRef.current + elapsed);
+      setProgress((position / duration) * 100);
+      try {
+        navigator.mediaSession.setPositionState({ duration, playbackRate: playing ? 1 : 0, position });
+      } catch { /* ignore */ }
+    };
+    updateCastPosition();
+    const id = window.setInterval(updateCastPosition, 1000);
+    return () => window.clearInterval(id);
+  }, [castConnected, duration, playing]);
+
   const togglePlay = () => {
     const v = videoRef.current; if (!v) return;
     if (castConnected && castStartedRef.current) {
