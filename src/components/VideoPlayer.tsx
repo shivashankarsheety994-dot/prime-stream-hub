@@ -53,28 +53,9 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
 
   const applyVolume = useCallback((val: number) => {
     const v = videoRef.current; if (!v) return;
-    const clamped = Math.max(0, Math.min(2, val));
-    // Native HTMLMediaElement.volume caps at 1
-    v.volume = Math.min(1, clamped);
+    const clamped = Math.max(0, Math.min(1, val));
+    v.volume = clamped;
     v.muted = clamped === 0;
-    if (clamped > 1) {
-      try {
-        if (!audioCtxRef.current) {
-          const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-          const ctx = new Ctx();
-          const source = ctx.createMediaElementSource(v);
-          const gain = ctx.createGain();
-          source.connect(gain).connect(ctx.destination);
-          audioCtxRef.current = ctx;
-          sourceNodeRef.current = source;
-          gainNodeRef.current = gain;
-        }
-        audioCtxRef.current?.resume().catch(() => {});
-        if (gainNodeRef.current) gainNodeRef.current.gain.value = clamped; // boost up to 2x
-      } catch { /* ignore */ }
-    } else if (gainNodeRef.current) {
-      gainNodeRef.current.gain.value = 1;
-    }
     setVolume(clamped);
     setMuted(clamped === 0);
   }, []);
@@ -327,7 +308,7 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
             const dy = touchStartYRef.current - e.touches[0].clientY; // up = positive
             const h = (e.currentTarget as HTMLDivElement).clientHeight || 1;
             // Full height swipe = 2.0 volume range
-            const delta = (dy / h) * 2;
+            const delta = dy / h; // full-height swipe = 0..1
             applyVolume(touchStartVolRef.current + delta);
             bumpVolumeHud();
             e.preventDefault();
@@ -341,13 +322,11 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
             <div className="text-white text-xs font-semibold tabular-nums">{Math.round(volume * 100)}%</div>
             <div className="relative w-1.5 h-40 rounded-full bg-white/20 overflow-hidden">
               <div
-                className={`absolute bottom-0 left-0 right-0 ${volume > 1 ? "bg-primary" : "bg-white"}`}
-                style={{ height: `${(volume / 2) * 100}%` }}
+                className="absolute bottom-0 left-0 right-0 bg-white"
+                style={{ height: `${volume * 100}%` }}
               />
-              {/* 100% marker */}
-              <div className="absolute left-0 right-0 h-px bg-white/60" style={{ bottom: "50%" }} />
             </div>
-            {volume > 1 ? <Volume2 className="h-4 w-4 text-primary" /> : volume === 0 ? <VolumeX className="h-4 w-4 text-white" /> : <Volume1 className="h-4 w-4 text-white" />}
+            {volume === 0 ? <VolumeX className="h-4 w-4 text-white" /> : <Volume1 className="h-4 w-4 text-white" />}
           </div>
         )}
 
@@ -472,18 +451,15 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
                   aria-label="Volume"
                   title="Click for volume, double-click to mute"
                 >
-                  {muted || volume === 0 ? <VolumeX className="h-6 w-6" /> : volume > 1 ? <Volume2 className="h-6 w-6 text-primary" /> : <Volume1 className="h-6 w-6" />}
+                  {muted || volume === 0 ? <VolumeX className="h-6 w-6" /> : <Volume1 className="h-6 w-6" />}
                 </button>
-                {volume > 1 && (
-                  <span className="text-[10px] font-bold text-primary uppercase tracking-wide">Boost {Math.round(volume * 100)}%</span>
-                )}
                 {showVolumePopover && (
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-black/90 border border-white/10 rounded-xl p-4 flex flex-col items-center gap-2 shadow-2xl">
                     <span className="text-xs text-white font-semibold tabular-nums">{Math.round(volume * 100)}%</span>
                     <input
                       type="range"
                       min={0}
-                      max={2}
+                      max={1}
                       step={0.01}
                       value={muted ? 0 : volume}
                       onChange={onVolumeChange}
@@ -491,7 +467,7 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
                       className="accent-primary cursor-pointer"
                       aria-label="Volume"
                     />
-                    <span className="text-[10px] text-white/60 uppercase tracking-wider">{volume > 1 ? "Boost" : "Vol"}</span>
+                    <span className="text-[10px] text-white/60 uppercase tracking-wider">Vol</span>
                   </div>
                 )}
               </div>
