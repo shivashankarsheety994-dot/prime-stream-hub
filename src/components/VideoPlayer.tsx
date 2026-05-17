@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { X, Play, Pause, Volume2, VolumeX, Loader2, RotateCcw, RotateCw, Maximize2, Minimize2, Expand, Shrink } from "lucide-react";
+import { X, Play, Pause, Volume2, VolumeX, Loader2, RotateCcw, RotateCw, Maximize2, Minimize2, Expand, Shrink, Volume1 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCast } from "@/context/CastContext";
 import { VodStream } from "@/lib/xtream";
@@ -30,7 +30,14 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [playing, setPlaying] = useState(true);
   const [muted, setMuted] = useState(false);
-  const [volume, setVolume] = useState(1);
+  const [volume, setVolume] = useState(1); // 0..2 (above 1 = boost)
+  const [showVolumeHud, setShowVolumeHud] = useState(false);
+  const volumeHudTimer = useRef<number | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
+  const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+  const touchStartVolRef = useRef<number>(1);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [showControls, setShowControls] = useState(true);
@@ -42,6 +49,40 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
   const castTimelineStartRef = useRef(0);
   const castStartPositionRef = useRef(0);
   const lastSaveRef = useRef(0);
+
+  const applyVolume = useCallback((val: number) => {
+    const v = videoRef.current; if (!v) return;
+    const clamped = Math.max(0, Math.min(2, val));
+    // Native HTMLMediaElement.volume caps at 1
+    v.volume = Math.min(1, clamped);
+    v.muted = clamped === 0;
+    if (clamped > 1) {
+      try {
+        if (!audioCtxRef.current) {
+          const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+          const ctx = new Ctx();
+          const source = ctx.createMediaElementSource(v);
+          const gain = ctx.createGain();
+          source.connect(gain).connect(ctx.destination);
+          audioCtxRef.current = ctx;
+          sourceNodeRef.current = source;
+          gainNodeRef.current = gain;
+        }
+        audioCtxRef.current?.resume().catch(() => {});
+        if (gainNodeRef.current) gainNodeRef.current.gain.value = clamped; // boost up to 2x
+      } catch { /* ignore */ }
+    } else if (gainNodeRef.current) {
+      gainNodeRef.current.gain.value = 1;
+    }
+    setVolume(clamped);
+    setMuted(clamped === 0);
+  }, []);
+
+  const bumpVolumeHud = useCallback(() => {
+    setShowVolumeHud(true);
+    if (volumeHudTimer.current) window.clearTimeout(volumeHudTimer.current);
+    volumeHudTimer.current = window.setTimeout(() => setShowVolumeHud(false), 1200);
+  }, []);
 
   const seek = useCallback((delta: number) => {
     const v = videoRef.current; if (!v) return;
@@ -234,12 +275,7 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
   };
 
   const onVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = videoRef.current; if (!v) return;
-    const val = Number(e.target.value);
-    v.volume = val;
-    v.muted = val === 0;
-    setVolume(val);
-    setMuted(val === 0);
+    applyVolume(Number(e.target.value));
   };
 
   const bumpControls = useCallback(() => {
@@ -275,6 +311,45 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
       onTouchStart={bumpControls}
     >
       <div ref={containerRef} className="relative w-full h-full bg-black flex items-center justify-center" onClick={bumpControls}>
+        {/* Right-side vertical swipe zone for volume (mobile) */}
+        <div
+          className="absolute right-0 top-0 h-full w-1/4 md:w-1/5 z-20"
+          style={{ touchAction: "none" }}
+          onTouchStart={(e) => {
+            if (e.touches.length !== 1) return;
+            touchStartYRef.current = e.touches[0].clientY;
+            touchStartVolRef.current = volume;
+            bumpVolumeHud();
+          }}
+          onTouchMove={(e) => {
+            if (touchStartYRef.current == null) return;
+            const dy = touchStartYRef.current - e.touches[0].clientY; // up = positive
+            const h = (e.currentTarget as HTMLDivElement).clientHeight || 1;
+            // Full height swipe = 2.0 volume range
+            const delta = (dy / h) * 2;
+            applyVolume(touchStartVolRef.current + delta);
+            bumpVolumeHud();
+            e.preventDefault();
+          }}
+          onTouchEnd={() => { touchStartYRef.current = null; }}
+        />
+
+        {/* Volume HUD */}
+        {showVolumeHud && (
+          <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center gap-2 bg-black/70 rounded-full px-3 py-4">
+            <div className="text-white text-xs font-semibold tabular-nums">{Math.round(volume * 100)}%</div>
+            <div className="relative w-1.5 h-40 rounded-full bg-white/20 overflow-hidden">
+              <div
+                className={`absolute bottom-0 left-0 right-0 ${volume > 1 ? "bg-primary" : "bg-white"}`}
+                style={{ height: `${(volume / 2) * 100}%` }}
+              />
+              {/* 100% marker */}
+              <div className="absolute left-0 right-0 h-px bg-white/60" style={{ bottom: "50%" }} />
+            </div>
+            {volume > 1 ? <Volume2 className="h-4 w-4 text-primary" /> : volume === 0 ? <VolumeX className="h-4 w-4 text-white" /> : <Volume1 className="h-4 w-4 text-white" />}
+          </div>
+        )}
+
         <video
           ref={videoRef}
           src={src}
@@ -394,13 +469,16 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
                 <input
                   type="range"
                   min={0}
-                  max={1}
+                  max={2}
                   step={0.01}
                   value={muted ? 0 : volume}
                   onChange={onVolumeChange}
-                  className="w-0 group-hover/vol:w-24 transition-all h-1 accent-primary cursor-pointer"
+                  className="w-0 group-hover/vol:w-28 transition-all h-1 accent-primary cursor-pointer"
                   aria-label="Volume"
                 />
+                {volume > 1 && (
+                  <span className="text-[10px] font-bold text-primary uppercase tracking-wide">Boost {Math.round(volume * 100)}%</span>
+                )}
               </div>
               <p className="ml-auto text-white/90 text-sm md:text-base font-medium truncate max-w-[40%]">{title}</p>
               <button
