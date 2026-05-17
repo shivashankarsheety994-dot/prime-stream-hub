@@ -32,6 +32,7 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
   const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(1); // 0..2 (above 1 = boost)
   const [showVolumeHud, setShowVolumeHud] = useState(false);
+  const [showVolumePopover, setShowVolumePopover] = useState(false);
   const volumeHudTimer = useRef<number | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
@@ -313,7 +314,7 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
       <div ref={containerRef} className="relative w-full h-full bg-black flex items-center justify-center" onClick={bumpControls}>
         {/* Right-side vertical swipe zone for volume (mobile) */}
         <div
-          className="absolute right-0 top-0 h-full w-1/4 md:w-1/5 z-20"
+          className="absolute right-0 top-0 h-full w-1/4 z-10 md:hidden"
           style={{ touchAction: "none" }}
           onTouchStart={(e) => {
             if (e.touches.length !== 1) return;
@@ -361,7 +362,7 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
           className={`w-full h-full ${fitMode === "cover" ? "object-cover" : "object-contain"}`}
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
-          onVolumeChange={(e) => { const v = e.currentTarget; setMuted(v.muted); setVolume(v.volume); }}
+          onVolumeChange={(e) => { setMuted(e.currentTarget.muted); }}
           onTimeUpdate={(e) => {
             const v = e.currentTarget;
             if (v.duration) setProgress((v.currentTime / v.duration) * 100);
@@ -410,7 +411,7 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
 
         {/* Netflix-style overlay */}
         <div
-          className={`absolute inset-0 flex flex-col justify-between transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+          className={`absolute inset-0 z-20 flex flex-col justify-between transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         >
           {/* Top bar */}
           <div className="p-4 md:p-6 flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent">
@@ -462,22 +463,36 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
               <button onClick={togglePlay} className="text-white hover:text-primary transition-colors" aria-label={playing ? "Pause" : "Play"}>
                 {playing ? <Pause className="h-6 w-6 fill-white" /> : <Play className="h-6 w-6 fill-white" />}
               </button>
-              <div className="flex items-center gap-2 group/vol">
-                <button onClick={toggleMute} className="text-white hover:text-primary transition-colors" aria-label={muted ? "Unmute" : "Mute"}>
-                  {muted || volume === 0 ? <VolumeX className="h-6 w-6" /> : <Volume2 className="h-6 w-6" />}
-                </button>
-                <input
-                  type="range"
-                  min={0}
-                  max={2}
-                  step={0.01}
-                  value={muted ? 0 : volume}
-                  onChange={onVolumeChange}
-                  className="w-0 group-hover/vol:w-28 transition-all h-1 accent-primary cursor-pointer"
+              {/* Volume control – desktop only */}
+              <div className="relative hidden md:flex items-center gap-2">
+                <button
+                  onClick={() => setShowVolumePopover((s) => !s)}
+                  onDoubleClick={toggleMute}
+                  className="text-white hover:text-primary transition-colors"
                   aria-label="Volume"
-                />
+                  title="Click for volume, double-click to mute"
+                >
+                  {muted || volume === 0 ? <VolumeX className="h-6 w-6" /> : volume > 1 ? <Volume2 className="h-6 w-6 text-primary" /> : <Volume1 className="h-6 w-6" />}
+                </button>
                 {volume > 1 && (
                   <span className="text-[10px] font-bold text-primary uppercase tracking-wide">Boost {Math.round(volume * 100)}%</span>
+                )}
+                {showVolumePopover && (
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-black/90 border border-white/10 rounded-xl p-4 flex flex-col items-center gap-2 shadow-2xl">
+                    <span className="text-xs text-white font-semibold tabular-nums">{Math.round(volume * 100)}%</span>
+                    <input
+                      type="range"
+                      min={0}
+                      max={2}
+                      step={0.01}
+                      value={muted ? 0 : volume}
+                      onChange={onVolumeChange}
+                      style={{ writingMode: "vertical-lr" as React.CSSProperties["writingMode"], direction: "rtl", WebkitAppearance: "slider-vertical", width: 8, height: 140 }}
+                      className="accent-primary cursor-pointer"
+                      aria-label="Volume"
+                    />
+                    <span className="text-[10px] text-white/60 uppercase tracking-wider">{volume > 1 ? "Boost" : "Vol"}</span>
+                  </div>
                 )}
               </div>
               <p className="ml-auto text-white/90 text-sm md:text-base font-medium truncate max-w-[40%]">{title}</p>
