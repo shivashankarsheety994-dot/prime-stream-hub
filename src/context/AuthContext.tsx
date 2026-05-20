@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { login as apiLogin, XtreamUserInfo } from "@/lib/xtream";
+import { SubscriptionWarning } from "@/components/SubscriptionWarning";
 
 interface AuthState {
   user: XtreamUserInfo | null;
@@ -16,6 +17,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<XtreamUserInfo | null>(null);
   const [credentials, setCredentials] = useState<{ username: string; password: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showWarning, setShowWarning] = useState(false);
 
   useEffect(() => {
     try {
@@ -28,6 +30,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch { /* ignore */ }
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    if (user?.exp_date) {
+      const expDate = new Date(Number(user.exp_date) * 1000);
+      const now = new Date();
+      const sevenDays = 7 * 24 * 60 * 60 * 1000;
+      if (expDate.getTime() - now.getTime() < sevenDays) {
+        setShowWarning(true);
+      }
+    }
+  }, [user]);
 
   const signIn = async (username: string, password: string) => {
     try {
@@ -53,6 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider value={{ user, credentials, loading, signIn, signOut }}>
       {children}
+      <SubscriptionWarning isOpen={showWarning} onClose={() => setShowWarning(false)} />
     </AuthContext.Provider>
   );
 }
