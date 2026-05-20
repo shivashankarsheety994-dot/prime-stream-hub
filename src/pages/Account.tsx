@@ -8,7 +8,7 @@ import { getContinueWatching, removeProgress, WatchEntry } from "@/lib/watchProg
 import { usePlayer } from "@/context/PlayerContext";
 
 export default function Account() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, refreshUser } = useAuth();
   const { play } = usePlayer();
   const navigate = useNavigate();
   const [history, setHistory] = useState<WatchEntry[]>([]);
@@ -19,6 +19,10 @@ export default function Account() {
     window.addEventListener("watch-progress-updated", refresh);
     return () => window.removeEventListener("watch-progress-updated", refresh);
   }, []);
+
+  useEffect(() => {
+    refreshUser();
+  }, [refreshUser]);
 
   if (!user) return <Navigate to="/login" replace />;
 
