@@ -2,9 +2,12 @@ import { VodStream } from "@/lib/xtream";
 import { usePlayer } from "@/context/PlayerContext";
 import { Play } from "lucide-react";
 
-interface Props { movies: VodStream[]; }
+interface Props {
+  movies: VodStream[];
+  title: string;
+}
 
-export function Top5Row({ movies }: Props) {
+export function Top5Row({ movies, title }: Props) {
   const { play } = usePlayer();
   const top = movies.slice(0, 5);
   if (!top.length) return null;
@@ -12,7 +15,7 @@ export function Top5Row({ movies }: Props) {
   return (
     <section className="py-4 md:py-6">
       <h3 className="px-4 md:px-8 text-xl md:text-2xl font-bold mb-3 tracking-wide">
-        Top 5 New Releases
+        {title}
       </h3>
       <div className="flex gap-2 md:gap-4 overflow-x-auto scrollbar-hide px-4 md:px-8 pb-4">
         {top.map((m, i) => (

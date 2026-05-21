@@ -7,6 +7,7 @@ import { MovieCard } from "@/components/MovieCard";
 import { getVodStreams, VodStream } from "@/lib/xtream";
 import { getContinueWatching, WatchEntry } from "@/lib/watchProgress";
 import { GenreRow } from "@/components/GenreRow";
+import { PosterMarquee } from "@/components/PosterMarquee";
 import { Top5Row } from "@/components/Top5Row";
 
 export default function Index() {
@@ -44,6 +45,14 @@ export default function Index() {
     });
   }, [streams]);
 
+  const topRatedStreams = useMemo(() => {
+    return [...streams].sort((a, b) => {
+      const aR = a.rating ? Number(a.rating) : 0;
+      const bR = b.rating ? Number(b.rating) : 0;
+      return bR - aR;
+    });
+  }, [streams]);
+
   if (loading) {
     return <CinemaLoader fullscreen />;
   }
@@ -52,7 +61,7 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="pb-16 pt-4 relative z-10">
+      <main className="pb-16 relative z-10">
         {dataLoading ? (
           <CinemaLoader label="Loading movies" />
         ) : streams.length === 0 ? (
@@ -62,16 +71,19 @@ export default function Index() {
           </div>
         ) : (
           <>
-            <Top5Row movies={sortedStreams} />
+            <PosterMarquee movies={sortedStreams} />
+            <Top5Row movies={sortedStreams} title="Top 5 New Releases" />
             {continueWatching.length > 0 && (
               <GenreRow
                 title="Continue Watching"
                 movies={continueWatching.map((e) => e.movie)}
+                variant="poster"
               />
             )}
-            <h2 className="text-xl font-bold px-4 mt-6">All Movies ({sortedStreams.length})</h2>
+            <Top5Row movies={topRatedStreams} title="Top 5 Rated" />
+            <h2 className="text-xl font-bold px-4 mt-6">Recently Added</h2>
             <div className="grid grid-cols-3 gap-4 p-4">
-              {sortedStreams.map((movie) => (
+              {sortedStreams.slice(0, 40).map((movie) => (
                 <MovieCard key={movie.stream_id} movie={movie} />
               ))}
             </div>
