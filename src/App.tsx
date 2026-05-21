@@ -9,10 +9,13 @@ import Login from "./pages/Login.tsx";
 import Account from "./pages/Account.tsx";
 import Plans from "./pages/Plans.tsx";
 import Language from "./pages/Language.tsx";
+import WebSeries from "./pages/WebSeries.tsx";
+import Continue from "./pages/Continue.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import { PlayerProvider } from "./context/PlayerContext.tsx";
 import { CastProvider } from "./context/CastContext.tsx";
 import { PortraitGate } from "./components/PortraitGate.tsx";
+import { BottomNavBar } from "./components/BottomNavBar.tsx";
 
 const queryClient = new QueryClient();
 
@@ -31,10 +34,13 @@ const App = () => (
                 <Route path="/account" element={<Account />} />
                 <Route path="/plans" element={<Plans />} />
                 <Route path="/language/:slug" element={<Language />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="/web-series" element={<WebSeries />} />
+                <Route path="/continue" element={<Continue />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL \"*\" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <PortraitGate />
+              <BottomNavBar />
             </PlayerProvider>
           </CastProvider>
         </AuthProvider>

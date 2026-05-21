@@ -5,7 +5,6 @@ import { useAuth } from "@/context/AuthContext";
 import { Header } from "@/components/Header";
 import { MovieCard } from "@/components/MovieCard";
 import { getVodStreams, VodStream } from "@/lib/xtream";
-import { getContinueWatching, WatchEntry } from "@/lib/watchProgress";
 import { GenreRow } from "@/components/GenreRow";
 import { PosterMarquee } from "@/components/PosterMarquee";
 import { Top5Row } from "@/components/Top5Row";
@@ -14,14 +13,6 @@ export default function Index() {
   const { user, credentials, loading } = useAuth();
   const [streams, setStreams] = useState<VodStream[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
-  const [continueWatching, setContinueWatching] = useState<WatchEntry[]>([]);
-
-  useEffect(() => {
-    const refresh = () => setContinueWatching(getContinueWatching());
-    refresh();
-    window.addEventListener("watch-progress-updated", refresh);
-    return () => window.removeEventListener("watch-progress-updated", refresh);
-  }, []);
 
   useEffect(() => {
     if (!credentials) return;
@@ -61,7 +52,7 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="pb-16 relative z-10">
+      <main className="pb-16 pt-16 relative z-10">
         {dataLoading ? (
           <CinemaLoader label="Loading movies" />
         ) : streams.length === 0 ? (
@@ -73,13 +64,6 @@ export default function Index() {
           <>
             <PosterMarquee movies={sortedStreams} />
             <Top5Row movies={sortedStreams} title="Top 5 New Releases" />
-            {continueWatching.length > 0 && (
-              <GenreRow
-                title="Continue Watching"
-                movies={continueWatching.map((e) => e.movie)}
-                variant="poster"
-              />
-            )}
             <Top5Row movies={topRatedStreams} title="Top 5 Rated" />
             <h2 className="text-xl font-bold px-4 mt-6">Recently Added</h2>
             <div className="grid grid-cols-3 gap-4 p-4">

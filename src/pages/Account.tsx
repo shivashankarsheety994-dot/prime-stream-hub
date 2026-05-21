@@ -1,24 +1,13 @@
 import { Navigate, useNavigate } from "react-router-dom";
-import { ArrowLeft, LogOut, User, Trash2, Play } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ArrowLeft, LogOut, User } from "lucide-react";
+import { useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { formatTimestamp } from "@/lib/xtream";
-import { getContinueWatching, removeProgress, WatchEntry } from "@/lib/watchProgress";
-import { usePlayer } from "@/context/PlayerContext";
 
 export default function Account() {
   const { user, signOut, refreshUser } = useAuth();
-  const { play } = usePlayer();
   const navigate = useNavigate();
-  const [history, setHistory] = useState<WatchEntry[]>([]);
-
-  useEffect(() => {
-    const refresh = () => setHistory(getContinueWatching());
-    refresh();
-    window.addEventListener("watch-progress-updated", refresh);
-    return () => window.removeEventListener("watch-progress-updated", refresh);
-  }, []);
 
   useEffect(() => {
     refreshUser();
@@ -65,44 +54,6 @@ export default function Account() {
           >
             <LogOut className="mr-2 h-4 w-4" /> Sign out
           </Button>
-        </section>
-
-        <section>
-          <h2 className="text-lg font-bold mb-3">Continue Watching</h2>
-          {history.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No movies in your watch history yet.</p>
-          ) : (
-            <ul className="space-y-2">
-              {history.map((e) => {
-                const pct = Math.min(100, (e.position / e.duration) * 100);
-                return (
-                  <li key={e.movie.stream_id} className="bg-card border border-border rounded-lg p-3 flex items-center gap-3">
-                    <button
-                      onClick={() => play(e.movie)}
-                      className="relative h-16 w-12 flex-shrink-0 rounded overflow-hidden bg-muted group"
-                    >
-                      {e.movie.stream_icon ? (
-                        <img src={e.movie.stream_icon} alt={e.movie.name} className="h-full w-full object-cover" />
-                      ) : null}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                        <Play className="h-5 w-5 text-white fill-white" />
-                      </div>
-                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
-                        <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
-                      </div>
-                    </button>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold truncate">{e.movie.name}</p>
-                      <p className="text-xs text-muted-foreground">{Math.round(pct)}% watched</p>
-                    </div>
-                    <Button variant="ghost" size="icon" onClick={() => removeProgress(e.movie.stream_id)} aria-label="Remove">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
         </section>
       </main>
     </div>
