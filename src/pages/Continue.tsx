@@ -21,8 +21,8 @@ const Continue = () => {
         <h1 className="text-2xl mb-4">Continue Watching</h1>
         {continueWatching.length > 0 ? (
           <div className="flex flex-col gap-4">
-            {continueWatching.map(({ movie, watched, duration }) => {
-              const progress = duration > 0 ? (watched / duration) * 100 : 0;
+            {continueWatching.map(({ movie, position, duration }) => {
+              const progress = duration > 0 ? (position / duration) * 100 : 0;
               return (
                 <button
                   key={movie.id}
@@ -47,9 +47,9 @@ const Continue = () => {
                     <p className="text-lg font-medium text-foreground line-clamp-2">
                       {movie.name}
                     </p>
-                    <div className="w-full bg-secondary rounded-full h-1.5 mt-2">
+                    <div className="w-full bg-secondary h-1.5 mt-2">
                       <div
-                        className="bg-primary h-1.5 rounded-full"
+                        className="bg-primary h-1.5"
                         style={{ width: `${progress}%` }}
                       />
                     </div>
