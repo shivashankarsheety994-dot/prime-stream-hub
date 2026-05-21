@@ -48,6 +48,6 @@ export function removeProgress(streamId: number) {
 
 export function getContinueWatching(): WatchEntry[] {
   return getAllProgress()
-    .filter((e) => !e.completed)
+    .filter((e) => !e.completed && e.movie?.stream_id && e.movie?.name)
     .sort((a, b) => b.updatedAt - a.updatedAt);
 }
