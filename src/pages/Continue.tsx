@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { GenreRow } from "@/components/GenreRow";
 import { Header } from "@/components/Header";
 import { getContinueWatching, WatchEntry } from "@/lib/watchProgress";
+import { usePlayer } from "@/context/PlayerContext";
 
 const Continue = () => {
   const [continueWatching, setContinueWatching] = useState<WatchEntry[]>([]);
+  const { play } = usePlayer();
 
   useEffect(() => {
     const refresh = () => setContinueWatching(getContinueWatching());
@@ -19,11 +20,44 @@ const Continue = () => {
       <main className="pb-16 pt-20 relative z-10 px-4">
         <h1 className="text-2xl mb-4">Continue Watching</h1>
         {continueWatching.length > 0 ? (
-          <GenreRow
-            title=""
-            movies={continueWatching.map((e) => e.movie)}
-            variant="poster"
-          />
+          <div className="flex flex-col gap-4">
+            {continueWatching.map(({ movie, watched, duration }) => {
+              const progress = duration > 0 ? (watched / duration) * 100 : 0;
+              return (
+                <button
+                  key={movie.id}
+                  onClick={() => play(movie)}
+                  className="flex items-center gap-4 bg-card p-2 rounded-lg shadow-md text-left w-full"
+                >
+                  <div className="w-20 h-28 flex-shrink-0 bg-secondary rounded-md overflow-hidden">
+                    {movie.stream_icon ? (
+                      <img
+                        src={movie.stream_icon}
+                        alt={`${movie.name} poster`}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs p-2 text-center">
+                        {movie.name}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-grow">
+                    <p className="text-lg font-medium text-foreground line-clamp-2">
+                      {movie.name}
+                    </p>
+                    <div className="w-full bg-secondary rounded-full h-1.5 mt-2">
+                      <div
+                        className="bg-primary h-1.5 rounded-full"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         ) : (
           <div className="text-center py-32 px-4">
             <h2 className="text-2xl font-bold mb-2">Nothing to continue</h2>
