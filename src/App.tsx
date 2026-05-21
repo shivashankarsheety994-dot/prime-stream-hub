@@ -15,7 +15,7 @@ import { AuthProvider } from "./context/AuthContext.tsx";
 import { PlayerProvider } from "./context/PlayerContext.tsx";
 import { CastProvider } from "./context/CastContext.tsx";
 import { PortraitGate } from "./components/PortraitGate.tsx";
-import { BottomNavBar } from "./components/BottomNavBar.tsx";
+import { BottomNav } from "./components/BottomNav.tsx";
 
 const queryClient = new QueryClient();
 
@@ -40,7 +40,7 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <PortraitGate />
-              <BottomNavBar />
+              <BottomNav />
             </PlayerProvider>
           </CastProvider>
         </AuthProvider>
