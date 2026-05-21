@@ -7,8 +7,8 @@ import { useCast } from "@/context/CastContext";
 const links = [
   { href: "/", label: "Home", icon: Home },
   { href: "/web-series", label: "Web Series", icon: Tv },
-  { href: "/continue", label: "Continue", icon: History },
   { href: "/account", label: "Account", icon: User },
+  { href: "/continue", label: "Continue", icon: History },
 ];
 
 export function BottomNav() {
