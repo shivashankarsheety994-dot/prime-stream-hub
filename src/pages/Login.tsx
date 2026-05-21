@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import logo from "@/assets/prime-cinema-logo.png";
+import logo from "@/assets/Primeflix.png";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -48,7 +48,7 @@ export default function Login() {
             alt="Primeflix"
             width={1536}
             height={1024}
-            className="mx-auto h-16 w-auto object-contain drop-shadow-[0_0_30px_hsl(var(--primary)/0.6)] mb-4"
+            className="mx-auto h-96 md:h-[500px] w-auto object-contain drop-shadow-[0_0_30px_hsl(var(--primary)/0.6)] mb-4"
           />
           <h1 className="sr-only">Primeflix</h1>
           <p className="text-muted-foreground">Sign in to continue streaming</p>
