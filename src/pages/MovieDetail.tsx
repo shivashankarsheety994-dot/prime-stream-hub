@@ -20,6 +20,8 @@ const MovieDetail: React.FC = () => {
   useEffect(() => {
     if (!credentials || !id) return;
 
+    window.scrollTo(0, 0);
+
     const isApple = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
     setIsAppleDevice(isApple);
 

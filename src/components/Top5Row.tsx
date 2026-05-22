@@ -1,6 +1,6 @@
 import { VodStream } from "@/lib/xtream";
-import { usePlayer } from "@/context/PlayerContext";
-import { Play, Star } from "lucide-react";
+import { Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   movies: VodStream[];
@@ -8,7 +8,7 @@ interface Props {
 }
 
 export function Top5Row({ movies, title }: Props) {
-  const { play } = usePlayer();
+  const navigate = useNavigate();
   const top = movies.slice(0, 5);
   if (!top.length) return null;
 
@@ -24,9 +24,9 @@ export function Top5Row({ movies, title }: Props) {
             <button
               key={m.stream_id}
               type="button"
-              onClick={() => play(m)}
+              onClick={() => navigate(`/movie/${m.stream_id}`)}
               className="group relative flex-shrink-0 flex items-end cursor-pointer"
-              aria-label={`Play ${m.name}`}
+              aria-label={`View details for ${m.name}`}
             >
               <span
                 aria-hidden
@@ -61,11 +61,6 @@ export function Top5Row({ movies, title }: Props) {
                     <span>{rating.toFixed(1)}</span>
                   </div>
                 )}
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="rounded-full bg-primary p-3 shadow-lg">
-                    <Play className="h-5 w-5 fill-primary-foreground text-primary-foreground" />
-                  </span>
-                </div>
               </div>
             </button>
           );
