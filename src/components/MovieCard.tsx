@@ -1,17 +1,22 @@
+
 import { Star } from "lucide-react";
 import { VodStream } from "@/lib/xtream";
-import { usePlayer } from "@/context/PlayerContext";
+import { useNavigate } from "react-router-dom";
 
 export function MovieCard({ movie }: { movie: VodStream }) {
-  const { play } = usePlayer();
+  const navigate = useNavigate();
   const rating = movie.rating ? Number(movie.rating) : 0;
+
+  const handleMovieClick = () => {
+    navigate(`/movie/${movie.stream_id}`);
+  };
 
   return (
     <button
       type="button"
-      onClick={() => play(movie)}
+      onClick={handleMovieClick}
       className="group text-left bg-card rounded-lg shadow-md overflow-hidden transition-transform duration-200 ease-in-out hover:scale-105"
-      aria-label={`Play ${movie.name}`}
+      aria-label={`View details for ${movie.name}`}
     >
       <div className="relative">
         <div className="aspect-[2/3] bg-secondary">
