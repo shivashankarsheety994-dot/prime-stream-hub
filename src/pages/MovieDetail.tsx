@@ -80,11 +80,13 @@ const MovieDetail: React.FC = () => {
       <div className="p-4">
         <h1 className="text-3xl font-bold mb-2">{movie.name}</h1>
         <div className="flex items-center space-x-4 my-4">
-          <Button onClick={() => play(movie)} className="bg-white text-black flex-grow">
-            <Play className="mr-2 h-4 w-4" /> Play
-          </Button>
+          {!isAppleDevice && (
+            <Button onClick={() => play(movie)} className="bg-white text-black flex-grow">
+              <Play className="mr-2 h-4 w-4" /> Play
+            </Button>
+          )}
           {isAppleDevice && (
-            <Button onClick={handlePlayInVLC} className="bg-gray-700 text-white">
+            <Button onClick={handlePlayInVLC} className="bg-gray-700 text-white flex-grow">
               Play in VLC
             </Button>
           )}
