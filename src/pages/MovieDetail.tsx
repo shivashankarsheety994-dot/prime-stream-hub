@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Play } from 'lucide-react';
-import { getVodStreams, VodStream, getVodInfo, VodInfo } from "@/lib/xtream";
+import { getVodStreams, VodStream, getVodInfo, VodInfo, buildStreamUrl } from "@/lib/xtream";
 import { useAuth } from "@/context/AuthContext";
 import { CinemaLoader } from "@/components/CinemaLoader";
 import { usePlayer } from '@/context/PlayerContext';
@@ -43,7 +43,10 @@ const MovieDetail: React.FC = () => {
   }, [credentials, id]);
 
   const handlePlayInVLC = () => {
-    window.location.href = `vlc://`;
+    if (movie && credentials) {
+      const streamUrl = buildStreamUrl(movie, credentials.username, credentials.password);
+      window.location.href = `vlc://${streamUrl}`;
+    }
   };
 
   if (loading) {
