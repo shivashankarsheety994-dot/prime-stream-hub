@@ -336,8 +336,9 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
           poster={poster}
           autoPlay
           playsInline
-          controlsList="nodownload noplaybackrate noremoteplayback"
+          controlsList="nodownload noplaybackrate"
           disablePictureInPicture
+          disableRemotePlayback
           className={`w-full h-full ${fitMode === "cover" ? "object-cover" : "object-contain"}`}
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Play } from 'lucide-react';
-import { getVodStreams, VodStream, getVodInfo, VodInfo, buildStreamUrl } from "@/lib/xtream";
+import { getVodStreams, VodStream, getVodInfo, VodInfo } from "@/lib/xtream";
 import { useAuth } from "@/context/AuthContext";
 import { CinemaLoader } from "@/components/CinemaLoader";
 import { usePlayer } from '@/context/PlayerContext';
@@ -15,15 +15,11 @@ const MovieDetail: React.FC = () => {
   const [movie, setMovie] = useState<VodStream | null>(null);
   const [vodInfo, setVodInfo] = useState<VodInfo | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isAppleDevice, setIsAppleDevice] = useState(false);
 
   useEffect(() => {
     if (!credentials || !id) return;
 
     window.scrollTo(0, 0);
-
-    const isApple = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
-    setIsAppleDevice(isApple);
 
     const fetchMovieData = async () => {
       setLoading(true);
@@ -41,13 +37,6 @@ const MovieDetail: React.FC = () => {
 
     fetchMovieData();
   }, [credentials, id]);
-
-  const handlePlayInVLC = () => {
-    if (movie && credentials) {
-      const streamUrl = buildStreamUrl(movie, credentials.username, credentials.password);
-      window.location.href = `vlc://${streamUrl}`;
-    }
-  };
 
   if (loading) {
     return <CinemaLoader fullscreen label="Loading movie details..." />;
@@ -80,16 +69,9 @@ const MovieDetail: React.FC = () => {
       <div className="p-4">
         <h1 className="text-3xl font-bold mb-2">{movie.name}</h1>
         <div className="flex items-center space-x-4 my-4">
-          {!isAppleDevice && (
             <Button onClick={() => play(movie)} className="bg-white text-black flex-grow">
               <Play className="mr-2 h-4 w-4" /> Play
             </Button>
-          )}
-          {isAppleDevice && (
-            <Button onClick={handlePlayInVLC} className="bg-gray-700 text-white flex-grow">
-              Play in VLC
-            </Button>
-          )}
         </div>
         <div className="flex items-center space-x-2 text-sm text-gray-400 mb-4">
           <span>{year}</span>
