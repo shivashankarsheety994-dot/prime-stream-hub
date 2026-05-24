@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Play } from 'lucide-react';
+import { ChevronLeft, Play, RotateCcw } from 'lucide-react';
 import { getVodStreams, VodStream, getVodInfo, VodInfo } from "@/lib/xtream";
 import { useAuth } from "@/context/AuthContext";
 import { CinemaLoader } from "@/components/CinemaLoader";
@@ -15,6 +15,7 @@ const MovieDetail: React.FC = () => {
   const [movie, setMovie] = useState<VodStream | null>(null);
   const [vodInfo, setVodInfo] = useState<VodInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [resumeTime, setResumeTime] = useState<number | null>(null);
 
   useEffect(() => {
     if (!credentials || !id) return;
@@ -30,6 +31,11 @@ const MovieDetail: React.FC = () => {
       if (foundMovie) {
         const detailedInfo = await getVodInfo(credentials.username, credentials.password, foundMovie.stream_id);
         setVodInfo(detailedInfo);
+
+        const savedTime = localStorage.getItem(`resume_time_${id}`);
+        if (savedTime) {
+          setResumeTime(parseFloat(savedTime));
+        }
       }
 
       setLoading(false);
@@ -37,6 +43,11 @@ const MovieDetail: React.FC = () => {
 
     fetchMovieData();
   }, [credentials, id]);
+
+  const handleStartOver = () => {
+    localStorage.removeItem(`resume_time_${id}`);
+    play(movie!);
+  };
 
   if (loading) {
     return <CinemaLoader fullscreen label="Loading movie details..." />;
@@ -69,9 +80,20 @@ const MovieDetail: React.FC = () => {
       <div className="p-4">
         <h1 className="text-3xl font-bold mb-2">{movie.name}</h1>
         <div className="flex items-center space-x-4 my-4">
-            <Button onClick={() => play(movie)} className="bg-white text-black flex-grow">
+          {resumeTime && resumeTime > 0 ? (
+            <>
+              <Button onClick={() => play(movie!, resumeTime)} className="bg-white text-black flex-grow">
+                <Play className="mr-2 h-4 w-4" /> Continue
+              </Button>
+              <Button onClick={handleStartOver} className="bg-gray-700 text-white">
+                <RotateCcw className="mr-2 h-4 w-4" /> Start Over
+              </Button>
+            </>
+          ) : (
+            <Button onClick={() => play(movie!)} className="bg-white text-black flex-grow">
               <Play className="mr-2 h-4 w-4" /> Play
             </Button>
+          )}
         </div>
         <div className="flex items-center space-x-2 text-sm text-gray-400 mb-4">
           <span>{year}</span>

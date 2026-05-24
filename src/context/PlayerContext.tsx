@@ -7,18 +7,22 @@ import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 
 interface PlayerCtx {
-  play: (movie: VodStream) => void;
+  play: (movie: VodStream, startTime?: number) => void;
+}
+
+interface CurrentStream extends VodStream {
+  startTime?: number;
 }
 
 const Ctx = createContext<PlayerCtx | undefined>(undefined);
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const { user, credentials } = useAuth();
-  const [current, setCurrent] = useState<VodStream | null>(null);
+  const [current, setCurrent] = useState<CurrentStream | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const play = (movie: VodStream) => {
+  const play = (movie: VodStream, startTime?: number) => {
     if (user?.exp_date) {
       const expDate = new Date(Number(user.exp_date) * 1000);
       const now = new Date();
@@ -31,7 +35,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         return;
       }
     }
-    setCurrent(movie);
+    setCurrent({ ...movie, startTime });
   };
 
   const close = () => setCurrent(null);
@@ -48,6 +52,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
           poster={current.stream_icon}
           movie={current}
           onClose={close}
+          startTime={current.startTime}
         />
       )}
     </Ctx.Provider>

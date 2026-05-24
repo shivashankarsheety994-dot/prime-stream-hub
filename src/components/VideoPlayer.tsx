@@ -11,6 +11,7 @@ interface Props {
   poster?: string;
   movie: VodStream;
   onClose: () => void;
+  startTime?: number;
 }
 
 type FullscreenContainer = HTMLDivElement & {
@@ -22,7 +23,7 @@ type LockableOrientation = ScreenOrientation & {
   unlock?: () => void;
 };
 
-export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
+export function VideoPlayer({ src, title, poster, movie, onClose, startTime }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const { connected: castConnected, castMovie, playRemote, pauseRemote, seekRemote } = useCast();
@@ -30,13 +31,10 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [playing, setPlaying] = useState(true);
   const [muted, setMuted] = useState(false);
-  const [volume, setVolume] = useState(1); // 0..2 (above 1 = boost)
+  const [volume, setVolume] = useState(1);
   const [showVolumeHud, setShowVolumeHud] = useState(false);
   const [showVolumePopover, setShowVolumePopover] = useState(false);
   const volumeHudTimer = useRef<number | null>(null);
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const gainNodeRef = useRef<GainNode | null>(null);
-  const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
   const touchStartYRef = useRef<number | null>(null);
   const touchStartVolRef = useRef<number>(1);
   const [progress, setProgress] = useState(0);
@@ -75,14 +73,12 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     v.currentTime = nextTime;
   }, [castConnected, duration, seekRemote]);
 
-  // Lock scroll while open
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = prev; };
   }, []);
 
-  // Auto-enter fullscreen on mobile, lock to landscape if possible
   useEffect(() => {
     const isMobile = window.matchMedia("(max-width: 768px)").matches;
     if (!isMobile) return;
@@ -96,14 +92,12 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     }).catch(() => {});
   }, []);
 
-  // ESC closes
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape" && !document.fullscreenElement) onClose(); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  // Track fullscreen state for the enlarge button
   useEffect(() => {
     const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", onFsChange);
@@ -127,7 +121,6 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
   };
 
   const handleClose = async () => {
-    // Save current position before closing
     const v = videoRef.current;
     if (v && v.duration) {
       saveProgress(movie, v.currentTime, v.duration);
@@ -141,7 +134,6 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
     onClose();
   };
 
-  // Save periodically while playing & on unmount
   useEffect(() => {
     return () => {
       const v = videoRef.current;
@@ -195,19 +187,19 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
 
   useEffect(() => {
     if (!castConnected || !src || castStartedRef.current) return;
-    const startTime = videoRef.current?.currentTime || getProgress(movie.stream_id)?.position || 0;
-    castMovie({ movie, src, title, poster, startTime })
+    const effectiveStartTime = startTime ?? getProgress(movie.stream_id)?.position ?? 0;
+    castMovie({ movie, src, title, poster, startTime: effectiveStartTime })
       .then((started) => {
         if (!started) return;
         castStartedRef.current = true;
         castTimelineStartRef.current = Date.now();
-        castStartPositionRef.current = startTime;
+        castStartPositionRef.current = effectiveStartTime;
         videoRef.current?.pause();
         setPlaying(true);
         setLoading(false);
       })
       .catch(() => {});
-  }, [castConnected, castMovie, movie, poster, src, title]);
+  }, [castConnected, castMovie, movie, poster, src, title, startTime]);
 
   useEffect(() => {
     if (!castConnected || !castStartedRef.current || !("mediaSession" in navigator) || !duration) return;
@@ -293,7 +285,6 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
       onTouchStart={bumpControls}
     >
       <div ref={containerRef} className="relative w-full h-full bg-black flex items-center justify-center" onClick={bumpControls}>
-        {/* Right-side vertical swipe zone for volume (mobile) */}
         <div
           className="absolute right-0 top-0 h-full w-1/4 z-10 md:hidden"
           style={{ touchAction: "none" }}
@@ -305,10 +296,9 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
           }}
           onTouchMove={(e) => {
             if (touchStartYRef.current == null) return;
-            const dy = touchStartYRef.current - e.touches[0].clientY; // up = positive
+            const dy = touchStartYRef.current - e.touches[0].clientY;
             const h = (e.currentTarget as HTMLDivElement).clientHeight || 1;
-            // Full height swipe = 2.0 volume range
-            const delta = dy / h; // full-height swipe = 0..1
+            const delta = dy / h;
             applyVolume(touchStartVolRef.current + delta);
             bumpVolumeHud();
             e.preventDefault();
@@ -316,7 +306,6 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
           onTouchEnd={() => { touchStartYRef.current = null; }}
         />
 
-        {/* Volume HUD */}
         {showVolumeHud && (
           <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center gap-2 bg-black/70 rounded-full px-3 py-4">
             <div className="text-white text-xs font-semibold tabular-nums">{Math.round(volume * 100)}%</div>
@@ -351,7 +340,6 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
                 navigator.mediaSession.setPositionState({ duration: v.duration, playbackRate: 1, position: v.currentTime });
               } catch { /* ignore */ }
             }
-            // Save every 5 seconds
             const now = Date.now();
             if (v.duration && now - lastSaveRef.current > 5000) {
               lastSaveRef.current = now;
@@ -361,12 +349,11 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
           onLoadedMetadata={(e) => {
             const v = e.currentTarget;
             setDuration(v.duration || 0);
-            // Resume from saved position
             if (!resumedRef.current) {
               resumedRef.current = true;
-              const saved = getProgress(movie.stream_id);
-              if (saved && saved.position > 5 && (!v.duration || saved.position < v.duration - 10)) {
-                try { v.currentTime = saved.position; } catch { /* ignore */ }
+              const effectiveStartTime = startTime ?? getProgress(movie.stream_id)?.position ?? 0;
+              if (effectiveStartTime > 5 && (!v.duration || effectiveStartTime < v.duration - 10)) {
+                try { v.currentTime = effectiveStartTime; } catch { /* ignore */ }
               }
             }
           }}
@@ -389,11 +376,9 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
           </div>
         )}
 
-        {/* Netflix-style overlay */}
         <div
           className={`absolute inset-0 z-20 flex flex-col justify-between transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         >
-          {/* Top bar */}
           <div className="p-4 md:p-6 flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent">
             <button
               onClick={handleClose}
@@ -407,7 +392,6 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
             <div className="w-7 md:w-32" />
           </div>
 
-          {/* Center play/seek */}
           <div className="flex-1 flex items-center justify-center gap-8 md:gap-16" onClick={(e) => e.stopPropagation()}>
             <button onClick={() => seek(-10)} className="text-white/90 hover:text-white hover:scale-110 transition-transform" aria-label="Rewind 10 seconds">
               <RotateCcw className="h-10 w-10 md:h-12 md:w-12" />
@@ -420,9 +404,7 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
             </button>
           </div>
 
-          {/* Bottom bar */}
           <div className="p-4 md:p-6 bg-gradient-to-t from-black/90 to-transparent" onClick={(e) => e.stopPropagation()}>
-            {/* Progress */}
             <div className="flex items-center gap-3 mb-3">
               <input
                 type="range"
@@ -438,12 +420,10 @@ export function VideoPlayer({ src, title, poster, movie, onClose }: Props) {
                 {fmt((progress / 100) * duration)} / {fmt(duration)}
               </span>
             </div>
-            {/* Controls row */}
             <div className="flex items-center gap-4">
               <button onClick={togglePlay} className="text-white hover:text-primary transition-colors" aria-label={playing ? "Pause" : "Play"}>
                 {playing ? <Pause className="h-6 w-6 fill-white" /> : <Play className="h-6 w-6 fill-white" />}
               </button>
-              {/* Volume control – desktop only */}
               <div className="relative hidden md:flex items-center gap-2">
                 <button
                   onClick={() => setShowVolumePopover((s) => !s)}
