@@ -17,7 +17,7 @@ import { AuthProvider } from "./context/AuthContext.tsx";
 import { PlayerProvider } from "./context/PlayerContext.tsx";
 import { CastProvider } from "./context/CastContext.tsx";
 import { PortraitGate } from "./components/PortraitGate.tsx";
-import { BottomNav } from "./components/BottomNav.tsx";
+import { MainLayout } from "./components/MainLayout.tsx";
 
 const queryClient = new QueryClient();
 
@@ -30,20 +30,21 @@ const App = () => (
         <AuthProvider>
           <CastProvider>
             <PlayerProvider>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/account" element={<Account />} />
-                <Route path="/plans" element={<Plans />} />
-                <Route path="/language/:slug" element={<Language />} />
-                <Route path="/web-series" element={<WebSeries />} />
-                <Route path="/continue" element={<Continue />} />
-                <Route path="/movie/:id" element={<MovieDetail />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL \"*\" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <PortraitGate />
-              <BottomNav />
+              <MainLayout>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/account" element={<Account />} />
+                  <Route path="/plans" element={<Plans />} />
+                  <Route path="/language/:slug" element={<Language />} />
+                  <Route path="/web-series" element={<WebSeries />} />
+                  <Route path="/continue" element={<Continue />} />
+                  <Route path="/movie/:id" element={<MovieDetail />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL \"*\" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <PortraitGate />
+              </MainLayout>
             </PlayerProvider>
           </CastProvider>
         </AuthProvider>
