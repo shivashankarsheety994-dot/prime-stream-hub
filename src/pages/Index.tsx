@@ -66,7 +66,7 @@ export default function Index() {
             <Top5Row movies={sortedStreams} title="Top 5 New Releases" />
             <Top5Row movies={topRatedStreams} title="Top 5 Rated" />
             <h2 className="text-xl font-bold px-4 mt-6">Recently Added</h2>
-            <div className="grid grid-cols-3 gap-4 p-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4 p-4">
               {sortedStreams.slice(0, 40).map((movie) => (
                 <MovieCard key={movie.stream_id} movie={movie} />
               ))}
