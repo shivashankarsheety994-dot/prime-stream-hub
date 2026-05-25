@@ -34,7 +34,6 @@ export function Top5Row({ movies, title }: Props) {
                 style={{
                   fontSize: "clamp(6rem, 18vw, 13rem)",
                   WebkitTextStroke: "3px hsl(var(--primary))",
-                  textShadow: "0 8px 24px hsl(var(--primary) / 0.35)",
                 }}
               >
                 {i + 1}
