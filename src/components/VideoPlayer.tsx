@@ -395,7 +395,7 @@ export function VideoPlayer({ src, title, poster, movie, onClose, startTime }: P
             </button>
             <p className="text-white font-semibold truncate px-3 text-base md:text-lg drop-shadow-lg">{title}</p>
             {isIphone && (
-                <a href={`vlc://${src}`}>
+                <a href={`vlc-x-callback://x-callback-url/stream?url=${encodeURIComponent(src)}`}>
                     <Button>Play on VLC</Button>
                 </a>
             )}
@@ -462,7 +462,7 @@ export function VideoPlayer({ src, title, poster, movie, onClose, startTime }: P
                   </div>
                 )}
               </div>
-              <p className="ml-auto text-white/90 text-sm md:text-base font-medium truncate max-w-[40%]">{title}</p>
+              <p className="ml-auto text-white/90 text-sm md:text-base font-medium truncate max-w-[40%">{title}</p>
               <button
                 onClick={() => setFitMode((m) => (m === "contain" ? "cover" : "contain"))}
                 className="text-white hover:text-primary transition-colors flex items-center gap-1.5"

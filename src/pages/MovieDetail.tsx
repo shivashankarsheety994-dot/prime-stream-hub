@@ -18,6 +18,11 @@ const MovieDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [resumeTime, setResumeTime] = useState<number | null>(null);
+  const [isIphone, setIsIphone] = useState(false);
+
+  useEffect(() => {
+    setIsIphone(/iPhone/.test(navigator.userAgent));
+  }, []);
 
   useEffect(() => {
     // Wait until credentials and id are available
@@ -99,6 +104,7 @@ const MovieDetail: React.FC = () => {
     : 'N/A';
 
   const backgroundUrl = vodInfo?.info?.movie_image || movie.stream_icon || '';
+  const streamUrl = `${credentials.url}/movie/${credentials.username}/${credentials.password}/${movie.stream_id}.${movie.container_extension}`;
 
   return (
     <div className="bg-black min-h-screen text-white">
@@ -157,6 +163,11 @@ const MovieDetail: React.FC = () => {
                 <Button onClick={() => play(movie!)} className="bg-white text-black">
                   <Play className="mr-2 h-4 w-4" /> Play
                 </Button>
+              )}
+              {isIphone && (
+                <a href={`vlc-x-callback://x-callback-url/stream?url=${encodeURIComponent(streamUrl)}`}>
+                    <Button>Play on VLC</Button>
+                </a>
               )}
             </div>
           </div>
