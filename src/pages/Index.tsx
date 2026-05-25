@@ -36,14 +36,6 @@ export default function Index() {
     });
   }, [streams]);
 
-  const topRatedStreams = useMemo(() => {
-    return [...streams].sort((a, b) => {
-      const aR = a.rating ? Number(a.rating) : 0;
-      const bR = b.rating ? Number(b.rating) : 0;
-      return bR - aR;
-    });
-  }, [streams]);
-
   if (loading) {
     return <CinemaLoader fullscreen />;
   }
@@ -64,7 +56,6 @@ export default function Index() {
           <>
             <PosterMarquee movies={sortedStreams} />
             <Top5Row movies={sortedStreams} title="Top 5 New Releases" />
-            <Top5Row movies={topRatedStreams} title="Top 5 Rated" />
             <h2 className="text-xl font-bold px-4 mt-6">Recently Added</h2>
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4 p-4">
               {sortedStreams.slice(0, 40).map((movie) => (
