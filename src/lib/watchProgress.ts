@@ -38,10 +38,17 @@ export function saveProgress(movie: VodStream, position: number, duration: numbe
   } catch { /* ignore */ }
 }
 
-export function removeProgress(streamId: number) {
+export function removeFromContinueWatching(streamId: number) {
   const all = getAllProgress().filter((e) => e.movie.stream_id !== streamId);
   try {
     localStorage.setItem(KEY, JSON.stringify(all));
+    window.dispatchEvent(new CustomEvent("watch-progress-updated"));
+  } catch { /* ignore */ }
+}
+
+export function clearContinueWatching() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify([]));
     window.dispatchEvent(new CustomEvent("watch-progress-updated"));
   } catch { /* ignore */ }
 }
