@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Play, RotateCcw, Star } from 'lucide-react';
-import { getVodStreams, VodStream, getVodInfo, VodInfo } from "@/lib/xtream";
+import { getVodStreams, VodStream, getVodInfo, VodInfo, buildStreamUrl } from "@/lib/xtream";
 import { useAuth } from "@/context/AuthContext";
 import { CinemaLoader } from "@/components/CinemaLoader";
 import { usePlayer } from '@/context/PlayerContext';
@@ -104,7 +104,7 @@ const MovieDetail: React.FC = () => {
     : 'N/A';
 
   const backgroundUrl = vodInfo?.info?.movie_image || movie.stream_icon || '';
-  const streamUrl = `${credentials.url}/movie/${credentials.username}/${credentials.password}/${movie.stream_id}.${movie.container_extension}`;
+  const streamUrl = buildStreamUrl(movie, credentials.username, credentials.password);
 
   return (
     <div className="bg-black min-h-screen text-white">
