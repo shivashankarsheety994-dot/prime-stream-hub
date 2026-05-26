@@ -22,7 +22,7 @@ export function PosterCard({ movie }: { movie: VodStream }) {
           onError={(e) => { e.currentTarget.src = "/placeholder.svg"; }}
         />
       ) : (
-        <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs p-2 text-center">
+        <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs p-2 text-center font-bold">
           {movie.name}
         </div>
       )}

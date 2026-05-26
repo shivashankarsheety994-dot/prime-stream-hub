@@ -109,16 +109,25 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
-    font-family: 'Bebas Neue', 'Inter', system-ui, sans-serif;
+    @apply bg-background text-foreground font-bold;
+    font-family: 'Amazon Ember', sans-serif;
   }
 
   html {
     @apply dark;
   }
+
+  button {
+    @apply font-bold;
+  }
 }
 
 @layer utilities {
+  @media screen and (max-width: 768px) {
+    body, h1, h2, h3, h4, h5, h6, p, span, div, button, a {
+      font-weight: bold !important;
+    }
+  }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 

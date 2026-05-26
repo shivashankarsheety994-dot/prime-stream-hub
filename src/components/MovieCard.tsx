@@ -42,7 +42,7 @@ export function MovieCard({ movie }: { movie: VodStream }) {
         )}
       </div>
       <div className="p-2">
-        <p className="text-sm font-medium text-foreground line-clamp-1">{movie.name}</p>
+        <p className="text-sm font-bold text-foreground line-clamp-1">{movie.name}</p>
       </div>
     </button>
   );
