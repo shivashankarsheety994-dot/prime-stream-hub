@@ -76,8 +76,8 @@ const Continue = () => {
                       </p>
                       <div className="w-full bg-secondary h-1.5 mt-2">
                         <div
-                          className="bg-primary h-1.5"
-                          style={{ width: `${progress}%` }}
+                          className="h-1.5"
+                          style={{ width: `${progress}%`, backgroundColor: '#E5A04A' }}
                         />
                       </div>
                     </div>

@@ -19,7 +19,7 @@ export function MovieCard({ movie }: { movie: VodStream }) {
       aria-label={`View details for ${movie.name}`}
     >
       <div className="relative">
-        <div className="aspect-[2/3] bg-secondary">
+        <div className="aspect-[2/3] bg-yellow-200">
           {movie.stream_icon ? (
             <img
               src={movie.stream_icon}
@@ -29,7 +29,7 @@ export function MovieCard({ movie }: { movie: VodStream }) {
               onError={(e) => { e.currentTarget.src = "/placeholder.svg"; }}
             />
           ) : (
-            <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs p-2 text-center">
+            <div className="h-full w-full flex items-center justify-center text-black text-xs p-2 text-center">
               {movie.name}
             </div>
           )}
@@ -42,7 +42,7 @@ export function MovieCard({ movie }: { movie: VodStream }) {
         )}
       </div>
       <div className="p-2">
-        <p className="text-sm font-bold text-foreground line-clamp-1">{movie.name}</p>
+        <p className="text-sm font-bold text-white line-clamp-1">{movie.name}</p>
       </div>
     </button>
   );

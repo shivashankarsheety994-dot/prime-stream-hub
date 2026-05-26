@@ -34,7 +34,7 @@ export default function Account() {
   return (
     <div className="min-h-screen bg-black text-white">
       <header className="flex items-center justify-between p-4">
-        <h1 className="text-2xl font-bold text-red-600">PRIMEFLIX</h1>
+        <h1 className="text-2xl font-bold" style={{ color: '#E5A04A' }}>PRIMEFLIX</h1>
         <div className="hidden md:block">
         <Button
           variant="secondary"

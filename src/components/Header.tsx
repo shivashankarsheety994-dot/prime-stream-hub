@@ -34,7 +34,7 @@ export function Header() {
     >
       <div className="container mx-auto flex h-16 items-center justify-center px-4 md:px-8">
         <Link to="/" aria-label="Primeflix home">
-          <h1 className="text-2xl font-bold tracking-widest text-red-600">
+          <h1 className="text-2xl font-bold tracking-widest" style={{ color: '#E5A04A' }}>
             PRIMEFLIX
           </h1>
         </Link>

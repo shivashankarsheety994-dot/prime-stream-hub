@@ -18,9 +18,9 @@ All colors MUST be HSL.
     --popover: 0 0% 8%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 0 84% 50%;
+    --primary: 45 84% 50%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 0 90% 60%;
+    --primary-glow: 45 90% 60%;
 
     --secondary: 0 0% 14%;
     --secondary-foreground: 0 0% 98%;
@@ -28,15 +28,15 @@ All colors MUST be HSL.
     --muted: 0 0% 14%;
     --muted-foreground: 0 0% 64%;
 
-    --accent: 0 84% 50%;
+    --accent: 45 84% 50%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 50%;
+    --destructive: 45 84% 50%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 0 0% 16%;
     --input: 0 0% 14%;
-    --ring: 0 84% 50%;
+    --ring: 45 84% 50%;
 
     --radius: 0.375rem;
 
@@ -74,7 +74,7 @@ All colors MUST be HSL.
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
+    --primary: 45 84% 50%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -83,10 +83,10 @@ All colors MUST be HSL.
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 45 84% 50%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 45 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 217.2 32.6% 17.5%;
@@ -117,17 +117,16 @@ All colors MUST be HSL.
     @apply dark;
   }
 
-  button {
-    @apply font-bold;
+  .sidebar-icon-active {
+    color: #E5A04A;
+  }
+
+  .bottom-nav-active {
+    color: #E5A04A;
   }
 }
 
 @layer utilities {
-  @media screen and (max-width: 768px) {
-    body, h1, h2, h3, h4, h5, h6, p, span, div, button, a {
-      font-weight: bold !important;
-    }
-  }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -137,6 +136,10 @@ All colors MUST be HSL.
 
   .marquee {
     animation: marquee 60s linear infinite;
+  }
+
+  .poster-text-background {
+    background-color: #E5A04A;
   }
 
   @keyframes marquee {
