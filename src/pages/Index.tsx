@@ -41,7 +41,7 @@ export default function Index() {
   if (!user) return <Navigate to="/login" replace />;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <Header />
       <main className="pb-16 pt-16 relative z-10">
         {dataLoading ? (
@@ -54,9 +54,12 @@ export default function Index() {
         ) : (
           <>
             <PosterMarquee movies={sortedStreams} />
-            <Top5Row movies={sortedStreams} title="Top 5 New Releases" />
-            <h2 className="text-xl font-bold px-4 mt-6">Movies</h2>
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-4 p-4">
+            <Top5Row movies={sortedStreams} title="Top 5 Latest" />
+            <div className="flex justify-between items-baseline px-4 mt-6">
+              <h2 className="text-xl font-bold">Latest Releases</h2>
+              <p className="text-sm text-muted-foreground">{sortedStreams.length} titles</p>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3 p-4">
               {sortedStreams.map((movie) => (
                 <MovieCard key={movie.stream_id} movie={movie} />
               ))}
