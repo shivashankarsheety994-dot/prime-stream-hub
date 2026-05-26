@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Header } from "@/components/Header";
 import { MovieCard } from "@/components/MovieCard";
 import { getVodStreams, VodStream } from "@/lib/xtream";
-import { PosterMarquee } from "@/components/PosterMarquee";
+import { Hero } from "@/components/Hero";
 
 export default function Index() {
   const { user, credentials, loading } = useAuth();
@@ -34,6 +34,10 @@ export default function Index() {
     });
   }, [streams]);
 
+  const heroMovies = useMemo(() => {
+    return sortedStreams.slice(0, 5);
+  }, [sortedStreams]);
+
   if (loading) {
     return <CinemaLoader fullscreen />;
   }
@@ -52,7 +56,7 @@ export default function Index() {
           </div>
         ) : (
           <>
-            <PosterMarquee movies={sortedStreams} />
+            {heroMovies.length > 0 && <Hero movies={heroMovies} />}
             <div className="flex justify-between items-baseline px-4 mt-6">
               <h2 className="text-xl font-bold">Latest Releases</h2>
               <p className="text-sm text-muted-foreground">{sortedStreams.length} titles</p>
