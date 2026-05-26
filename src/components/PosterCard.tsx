@@ -10,7 +10,7 @@ export function PosterCard({ movie }: { movie: VodStream }) {
     <button
       type="button"
       onClick={() => play(movie)}
-      className="group relative w-32 aspect-[2/3] rounded-lg overflow-hidden bg-secondary shadow-md transition-transform duration-200 ease-in-out hover:scale-105 flex-shrink-0"
+      className="group relative w-24 sm:w-28 md:w-32 lg:w-36 aspect-[2/3] rounded-lg overflow-hidden bg-secondary shadow-md transition-transform duration-200 ease-in-out hover:scale-105 flex-shrink-0"
       aria-label={`Play ${movie.name}`}
     >
       {movie.stream_icon ? (

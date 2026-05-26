@@ -15,7 +15,7 @@ export function MovieCard({ movie }: { movie: VodStream }) {
     <button
       type="button"
       onClick={handleMovieClick}
-      className="group text-left bg-card rounded-lg shadow-md overflow-hidden transition-transform duration-200 ease-in-out hover:scale-105"
+      className="group text-left bg-card rounded-lg shadow-md overflow-hidden transition-transform duration-200 ease-in-out hover:scale-105 w-full"
       aria-label={`View details for ${movie.name}`}
     >
       <div className="relative">

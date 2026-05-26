@@ -5,7 +5,6 @@ import { useAuth } from "@/context/AuthContext";
 import { Header } from "@/components/Header";
 import { MovieCard } from "@/components/MovieCard";
 import { getVodStreams, VodStream } from "@/lib/xtream";
-import { GenreRow } from "@/components/GenreRow";
 import { PosterMarquee } from "@/components/PosterMarquee";
 import { Top5Row } from "@/components/Top5Row";
 
@@ -56,9 +55,9 @@ export default function Index() {
           <>
             <PosterMarquee movies={sortedStreams} />
             <Top5Row movies={sortedStreams} title="Top 5 New Releases" />
-            <h2 className="text-xl font-bold px-4 mt-6">Recently Added</h2>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4 p-4">
-              {sortedStreams.slice(0, 40).map((movie) => (
+            <h2 className="text-xl font-bold px-4 mt-6">Movies</h2>
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-4 p-4">
+              {sortedStreams.map((movie) => (
                 <MovieCard key={movie.stream_id} movie={movie} />
               ))}
             </div>
