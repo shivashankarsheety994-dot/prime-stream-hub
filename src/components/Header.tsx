@@ -32,7 +32,7 @@ export function Header() {
         show ? "translate-y-0" : "-translate-y-full"
       }`}
     >
-      <div className="container mx-auto flex h-16 items-center justify-start px-4 md:px-8">
+      <div className="container mx-auto flex h-16 items-center justify-center px-4 md:px-8">
         <Link to="/" aria-label="Primeflix home">
           <h1 className="text-2xl font-bold tracking-widest text-red-600">
             PRIMEFLIX
