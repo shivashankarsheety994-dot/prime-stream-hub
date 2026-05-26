@@ -45,9 +45,9 @@ export function PosterMarquee({ movies }: Props) {
       <div className="absolute inset-0 pointer-events-none" style={{ background: "var(--gradient-side)" }} />
       <div className="absolute inset-x-0 bottom-8 z-10 text-center px-4 animate-fade-in">
         <h2 className="text-4xl md:text-6xl font-bold tracking-tight text-shadow-hero">
-          Unlimited <span className="text-primary">Movies</span>, Endless Stories
+          Primeflix
         </h2>
-        <p className="mt-2 text-sm md:text-base text-muted-foreground">Stream the latest blockbusters across every genre.</p>
+        <p className="mt-2 text-sm md:text-base text-muted-foreground">Your Destination for Unlimited Entertainment</p>
       </div>
     </section>
   );
