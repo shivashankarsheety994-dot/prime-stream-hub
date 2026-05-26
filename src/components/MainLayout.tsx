@@ -10,9 +10,9 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const showNav = !noNavPaths.includes(location.pathname);
 
   return (
-    <div className="flex h-screen">
+    <div className="flex min-h-screen">
       {showNav && <DesktopSidebar />}
-      <main className={`flex-1 ${showNav ? 'md:ml-20' : ''} overflow-y-auto ${showNav ? 'pb-16 md:pb-0' : ''}`}>
+      <main className={`flex-1 ${showNav ? 'md:ml-20' : ''} ${showNav ? 'pb-16 md:pb-0' : ''}`}>
         {children}
       </main>
       {showNav && (
