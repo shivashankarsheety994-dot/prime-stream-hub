@@ -6,7 +6,6 @@ import { Header } from "@/components/Header";
 import { MovieCard } from "@/components/MovieCard";
 import { getVodStreams, VodStream } from "@/lib/xtream";
 import { PosterMarquee } from "@/components/PosterMarquee";
-import { Top5Row } from "@/components/Top5Row";
 
 export default function Index() {
   const { user, credentials, loading } = useAuth();
@@ -54,7 +53,6 @@ export default function Index() {
         ) : (
           <>
             <PosterMarquee movies={sortedStreams} />
-            <Top5Row movies={sortedStreams} title="Top 5 Latest" />
             <div className="flex justify-between items-baseline px-4 mt-6">
               <h2 className="text-xl font-bold">Latest Releases</h2>
               <p className="text-sm text-muted-foreground">{sortedStreams.length} titles</p>
