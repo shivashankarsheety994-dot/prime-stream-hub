@@ -42,7 +42,7 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <Header />
-      <main className="pb-16 pt-16 relative z-10">
+      <main className="relative z-10">
         {dataLoading ? (
           <CinemaLoader label="Loading movies" />
         ) : streams.length === 0 ? (
