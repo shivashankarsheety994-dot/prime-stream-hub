@@ -153,7 +153,7 @@ const MovieDetail: React.FC = () => {
               {resumeTime ? (
                 <>
                   <Button onClick={() => play(movie!, resumeTime)} className="bg-white text-black">
-                    <Play className="mr-2 h-4 w-4" /> Continue
+                    <Play className="mr-2 h-4 w-4" /> Continue Watching
                   </Button>
                   <Button onClick={handleStartOver} variant="outline" className="text-white">
                     <RotateCcw className="mr-2 h-4 w-4" /> Start Over
@@ -161,7 +161,7 @@ const MovieDetail: React.FC = () => {
                 </>
               ) : (
                 <Button onClick={() => play(movie!)} className="bg-white text-black">
-                  <Play className="mr-2 h-4 w-4" /> Play
+                  <Play className="mr-2 h-4 w-4" /> Watch
                 </Button>
               )}
               {isIphone && (

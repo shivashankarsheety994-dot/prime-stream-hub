@@ -71,9 +71,9 @@ export function Hero({ movies }: Props) {
             </p>
             <Link
               to={`/movie/${movie.stream_id}`}
-              className="inline-block bg-red-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-red-700 transition-colors"
+              className="inline-block bg-white text-black px-8 py-3 rounded-md font-semibold hover:bg-gray-200 transition-transform transform hover:scale-105"
             >
-              Play
+              Watch
             </Link>
           </div>
         </div>
