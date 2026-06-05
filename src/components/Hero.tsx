@@ -11,7 +11,7 @@ interface Props {
 
 export function Hero({ movies }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [vodInfo, setVodInfo] = useState<VodInfo | null>(null);
+  const [vodInfoById, setVodInfoById] = useState<Record<number, VodInfo | null>>({});
   const { user } = useAuth();
 
   useEffect(() => {
@@ -25,20 +25,31 @@ export function Hero({ movies }: Props) {
   }, [movies.length]);
 
   useEffect(() => {
-    const fetchVodInfo = async () => {
-      if (user && movies[currentIndex]) {
-        const info = await getVodInfo(user.username, user.password, movies[currentIndex].stream_id);
-        setVodInfo(info);
-      }
+    const fetchHeroInfos = async () => {
+      if (!user || movies.length === 0) return;
+
+      const entries = await Promise.all(
+        movies.map(async (movie) => [
+          movie.stream_id,
+          await getVodInfo(user.username, user.password, movie.stream_id),
+        ] as const),
+      );
+
+      setVodInfoById(Object.fromEntries(entries));
     };
-    fetchVodInfo();
-  }, [currentIndex, movies, user]);
+
+    fetchHeroInfos();
+  }, [movies, user]);
 
   const movie = movies[currentIndex];
+  const vodInfo = movie ? vodInfoById[movie.stream_id] : null;
+  const isInfoLoading = movie ? !Object.prototype.hasOwnProperty.call(vodInfoById, movie.stream_id) : false;
 
   if (!movie) return null;
 
   const rating = movie.rating ? Number(movie.rating) : 0;
+  const genreText = vodInfo?.info?.genre ?? (isInfoLoading ? "Loading..." : "");
+  const plotText = vodInfo?.info?.plot ?? (isInfoLoading ? "Loading description..." : "");
 
   return (
     <div className="relative w-full h-[50vh] md:h-[80vh] bg-black">

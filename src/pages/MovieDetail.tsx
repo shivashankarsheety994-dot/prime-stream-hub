@@ -142,6 +142,7 @@ const MovieDetail: React.FC = () => {
               {vodInfo?.info?.genre && <span>{vodInfo.info.genre}</span>}
               {movie.rating && Number(movie.rating) > 0 ? (
                 <span className="flex items-center text-yellow-400">
+                  <span className="mr-2 uppercase tracking-[0.18em] text-xs">IMDB</span>
                   <Star className="h-4 w-4 mr-1 fill-yellow-400" />
                   {Number(movie.rating).toFixed(1)}
                 </span>

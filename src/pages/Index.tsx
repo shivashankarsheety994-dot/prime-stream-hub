@@ -57,9 +57,8 @@ export default function Index() {
         ) : (
           <>
             {heroMovies.length > 0 && <Hero movies={heroMovies} />}
-            <div className="flex justify-between items-baseline px-4 mt-6">
+            <div className="px-4 mt-6">
               <h2 className="text-xl font-bold">Latest Releases</h2>
-              <p className="text-sm text-muted-foreground">{sortedStreams.length} titles</p>
             </div>
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3 p-4">
               {sortedStreams.map((movie) => (
