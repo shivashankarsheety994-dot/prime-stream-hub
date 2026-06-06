@@ -10,17 +10,8 @@ const plans = [
     name: "Monthly",
     price: "₹40",
     period: "/ month",
-    tagline: "Best for trying it out",
+    tagline: "Best value for monthly access",
     features: ["Full HD streaming", "All categories", "Cancel anytime"],
-    highlight: false,
-  },
-  {
-    id: "bi-monthly",
-    name: "2 Months",
-    price: "₹60",
-    period: "/ 2 months",
-    tagline: "Save ₹20 — most popular",
-    features: ["Everything in Monthly", "Priority support", "Save 25%"],
     highlight: true,
   },
 ];
@@ -45,14 +36,14 @@ export default function Plans() {
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Choose your plan</h1>
           <p className="text-muted-foreground mt-2">Unlimited streaming. Cancel whenever you like.</p>
         </header>
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 justify-items-center">
           {plans.map((p) => (
             <Card
               key={p.id}
               className={
-                p.highlight
+                `${p.highlight
                   ? "relative border-primary/60 bg-card/80 backdrop-blur shadow-[0_0_40px_-10px_hsl(var(--primary)/0.6)]"
-                  : "relative bg-card/60 backdrop-blur"
+                  : "relative bg-card/60 backdrop-blur"} w-full max-w-md`
               }
             >
               {p.highlight && (
