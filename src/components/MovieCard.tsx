@@ -1,11 +1,15 @@
 
+import { useState } from "react";
 import { Star } from "lucide-react";
 import { VodStream } from "@/lib/xtream";
 import { useNavigate } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function MovieCard({ movie }: { movie: VodStream }) {
   const navigate = useNavigate();
+  const [loaded, setLoaded] = useState(false);
   const rating = movie.rating ? Number(movie.rating) : 0;
+  const hasImage = Boolean(movie.stream_icon);
 
   const handleMovieClick = () => {
     navigate(`/movie/${movie.stream_id}`);
@@ -19,14 +23,19 @@ export function MovieCard({ movie }: { movie: VodStream }) {
       aria-label={`View details for ${movie.name}`}
     >
       <div className="relative">
-        <div className="aspect-[2/3] bg-yellow-200">
-          {movie.stream_icon ? (
+        <div className="aspect-[2/3] bg-muted overflow-hidden">
+          {hasImage && !loaded && <Skeleton className="absolute inset-0" />}
+          {hasImage ? (
             <img
               src={movie.stream_icon}
               alt={`${movie.name} poster`}
               loading="lazy"
-              className="w-full h-full object-cover"
-              onError={(e) => { e.currentTarget.src = "/placeholder.svg"; }}
+              className={`w-full h-full object-cover transition-opacity duration-300 ease-in-out ${loaded ? "opacity-100" : "opacity-0"}`}
+              onLoad={() => setLoaded(true)}
+              onError={(e) => {
+                e.currentTarget.src = "/placeholder.svg";
+                setLoaded(true);
+              }}
             />
           ) : (
             <div className="h-full w-full flex items-center justify-center text-black text-xs p-2 text-center">
