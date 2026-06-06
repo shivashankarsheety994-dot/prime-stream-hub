@@ -212,6 +212,10 @@ export function VideoPlayer({ src, title, poster, movie, onClose, startTime }: P
       const elapsed = playing ? (Date.now() - castTimelineStartRef.current) / 1000 : 0;
       const position = Math.min(duration, castStartPositionRef.current + elapsed);
       setProgress((position / duration) * 100);
+      if (Date.now() - lastSaveRef.current > 15000) {
+        saveProgress(movie, position, duration);
+        lastSaveRef.current = Date.now();
+      }
       try {
         navigator.mediaSession.setPositionState({ duration, playbackRate: playing ? 1 : 0, position });
       } catch { /* ignore */ }
@@ -219,7 +223,7 @@ export function VideoPlayer({ src, title, poster, movie, onClose, startTime }: P
     updateCastPosition();
     const id = window.setInterval(updateCastPosition, 1000);
     return () => window.clearInterval(id);
-  }, [castConnected, duration, playing]);
+  }, [castConnected, duration, playing, movie]);
 
   const togglePlay = () => {
     const v = videoRef.current; if (!v) return;

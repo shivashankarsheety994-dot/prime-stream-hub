@@ -7,7 +7,7 @@ import { getVodStreams, VodStream, getVodInfo, VodInfo, buildStreamUrl } from "@
 import { useAuth } from "@/context/AuthContext";
 import { CinemaLoader } from "@/components/CinemaLoader";
 import { usePlayer } from '@/context/PlayerContext';
-import { getProgress, saveProgress } from '@/lib/watchProgress';
+import { getProgress, saveProgress, removeFromContinueWatching } from '@/lib/watchProgress';
 
 const MovieDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -65,7 +65,7 @@ const MovieDetail: React.FC = () => {
     if (!movie) return;
     const progress = getProgress(movie.stream_id);
     if (progress) {
-      saveProgress(movie, 0, progress.duration);
+      removeFromContinueWatching(movie.stream_id);
     }
     play(movie!, 0);
     setResumeTime(null);
@@ -151,16 +151,21 @@ const MovieDetail: React.FC = () => {
               )}
             </div>
 
-            <div className="flex items-center justify-center md:justify-start space-x-4 my-5">
+            <div className="flex flex-col gap-3 my-5 text-center md:text-left">
               {resumeTime ? (
-                <>
-                  <Button onClick={() => play(movie!, resumeTime)} className="bg-white text-black">
-                    <Play className="mr-2 h-4 w-4" /> Continue Watching
-                  </Button>
-                  <Button onClick={handleStartOver} variant="outline" className="text-white">
-                    <RotateCcw className="mr-2 h-4 w-4" /> Start Over
-                  </Button>
-                </>
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-300">
+                    You stopped at {Math.floor(resumeTime / 60)}:{String(Math.floor(resumeTime % 60)).padStart(2, "0")}.
+                  </p>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 justify-center md:justify-start">
+                    <Button onClick={() => play(movie!, resumeTime)} className="bg-white text-black">
+                      <Play className="mr-2 h-4 w-4" /> Continue Watching
+                    </Button>
+                    <Button onClick={handleStartOver} variant="outline" className="text-white">
+                      <RotateCcw className="mr-2 h-4 w-4" /> Start Over
+                    </Button>
+                  </div>
+                </div>
               ) : (
                 <Button onClick={() => play(movie!)} className="bg-white text-black">
                   <Play className="mr-2 h-4 w-4" /> Watch
@@ -168,7 +173,7 @@ const MovieDetail: React.FC = () => {
               )}
               {isIphone && (
                 <a href={`vlc-x-callback://x-callback-url/stream?url=${encodeURIComponent(streamUrl)}`}>
-                    <Button>Play on VLC</Button>
+                  <Button>Play on VLC</Button>
                 </a>
               )}
             </div>

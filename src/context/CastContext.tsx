@@ -139,6 +139,8 @@ export function CastProvider({ children }: { children: ReactNode }) {
     const mediaInfo = new window.chrome.cast.media.MediaInfo(src, contentType);
     const metadata = new window.chrome.cast.media.MovieMediaMetadata();
     metadata.title = title;
+    metadata.subtitle = movie.rating ? `Rating ${movie.rating}` : "Primeflix";
+    metadata.studio = "Primeflix";
     if (poster) metadata.images = [new window.chrome.cast.Image(poster)];
     mediaInfo.metadata = metadata;
     mediaInfo.streamType = window.chrome.cast.media.StreamType.BUFFERED;
