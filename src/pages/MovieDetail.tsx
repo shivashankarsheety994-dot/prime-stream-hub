@@ -2,17 +2,20 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Play, RotateCcw, Star } from 'lucide-react';
+import { Cast, ChevronLeft, Play, RotateCcw, Star } from 'lucide-react';
 import { getVodStreams, VodStream, getVodInfo, VodInfo, buildStreamUrl } from "@/lib/xtream";
 import { useAuth } from "@/context/AuthContext";
 import { CinemaLoader } from "@/components/CinemaLoader";
 import { usePlayer } from '@/context/PlayerContext';
+import { useCast } from '@/context/CastContext';
+import { cn } from '@/lib/utils';
 import { getProgress, saveProgress, removeFromContinueWatching } from '@/lib/watchProgress';
 
 const MovieDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { credentials } = useAuth();
+  const { credentials, user } = useAuth();
   const { play } = usePlayer();
+  const { available, connected, deviceName, connect } = useCast();
   const [movie, setMovie] = useState<VodStream | null>(null);
   const [vodInfo, setVodInfo] = useState<VodInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -125,6 +128,18 @@ const MovieDetail: React.FC = () => {
           <ChevronLeft />
         </Button>
       </div>
+
+      {user && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn("absolute top-4 right-4 z-20", connected && "text-primary")}
+          onClick={() => connect().catch(() => {})}
+          title={connected ? `Connected Chromecast${deviceName ? `: ${deviceName}` : ""}` : available ? "Connect Chromecast" : "Chromecast available in Chrome"}
+        >
+          <Cast className="h-4 w-4" />
+        </Button>
+      )}
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:pt-[25vh]">
         <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
