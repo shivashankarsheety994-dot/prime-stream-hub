@@ -48,11 +48,6 @@ export function VideoPlayer({ src, title, poster, movie, onClose, startTime }: P
   const castTimelineStartRef = useRef(0);
   const castStartPositionRef = useRef(0);
   const lastSaveRef = useRef(0);
-  const [isIphone, setIsIphone] = useState(false);
-
-  useEffect(() => {
-    setIsIphone(/iPhone/.test(navigator.userAgent));
-  }, []);
 
   const applyVolume = useCallback((val: number) => {
     const v = videoRef.current; if (!v) return;
@@ -398,11 +393,6 @@ export function VideoPlayer({ src, title, poster, movie, onClose, startTime }: P
               <span className="hidden md:inline text-sm font-medium">Back to browse</span>
             </button>
             <p className="text-white font-semibold truncate px-3 text-base md:text-lg drop-shadow-lg">{title}</p>
-            {isIphone && (
-                <a href={`vlc-x-callback://x-callback-url/stream?url=${encodeURIComponent(src)}`}>
-                    <Button>Play on VLC</Button>
-                </a>
-            )}
             <div className="w-7 md:w-32" />
           </div>
 

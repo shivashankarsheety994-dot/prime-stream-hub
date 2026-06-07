@@ -21,11 +21,6 @@ const MovieDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [resumeTime, setResumeTime] = useState<number | null>(null);
-  const [isIphone, setIsIphone] = useState(false);
-
-  useEffect(() => {
-    setIsIphone(/iPhone/.test(navigator.userAgent));
-  }, []);
 
   useEffect(() => {
     // Wait until credentials and id are available
@@ -185,11 +180,6 @@ const MovieDetail: React.FC = () => {
                 <Button onClick={() => play(movie!)} className="bg-white text-black">
                   <Play className="mr-2 h-4 w-4" /> Watch
                 </Button>
-              )}
-              {isIphone && (
-                <a href={`vlc-x-callback://x-callback-url/stream?url=${encodeURIComponent(streamUrl)}`}>
-                  <Button>Play on VLC</Button>
-                </a>
               )}
             </div>
           </div>

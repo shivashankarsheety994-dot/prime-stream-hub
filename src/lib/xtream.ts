@@ -71,13 +71,29 @@ export async function getVodStreams(username: string, password: string, category
   }
 }
 
-export function formatTimestamp(ts?: string | number): string {
-  if (!ts) return "—";
-  const n = typeof ts === "string" ? parseInt(ts, 10) : ts;
-  if (!n || isNaN(n)) return String(ts);
-  const d = new Date(n * 1000);
-  if (isNaN(d.getTime())) return String(ts);
-  return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+export function formatTimestamp(ts?: string | number, options?: Intl.DateTimeFormatOptions): string {
+  if (ts === undefined || ts === null || ts === "") return "—";
+
+  let date: Date | null = null;
+  if (typeof ts === "number") {
+    date = ts < 1e12 ? new Date(ts * 1000) : new Date(ts);
+  } else {
+    const numeric = Number(ts);
+    if (!Number.isNaN(numeric)) {
+      date = numeric < 1e12 ? new Date(numeric * 1000) : new Date(numeric);
+    } else {
+      const parsed = Date.parse(ts);
+      if (!Number.isNaN(parsed)) {
+        date = new Date(parsed);
+      }
+    }
+  }
+
+  if (!date || isNaN(date.getTime())) {
+    return String(ts);
+  }
+
+  return date.toLocaleDateString(undefined, options ?? { year: "numeric", month: "short", day: "numeric" });
 }
 
 export interface VodInfo {
