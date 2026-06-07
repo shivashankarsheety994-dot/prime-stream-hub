@@ -51,7 +51,7 @@ const Continue = () => {
             {continueWatching.map(({ movie, position, duration }) => {
               const progress = duration > 0 ? (position / duration) * 100 : 0;
               return (
-                <div key={movie.id} className="relative group">
+                <div key={movie.stream_id} className="relative group">
                   <button
                     onClick={() => play(movie)}
                     className="flex items-center gap-4 bg-card p-2 rounded-lg shadow-md text-left w-full"
