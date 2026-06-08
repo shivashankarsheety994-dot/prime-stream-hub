@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { Home, Play, User, Tv } from "lucide-react";
+import { Home, Play, User } from "lucide-react";
 
 export const BottomNavBar = () => {
   return (
@@ -16,13 +16,15 @@ export const BottomNavBar = () => {
         <Play />
         <span className="text-xs">Continue</span>
       </NavLink>
-      <NavLink to="/web-series" className={({ isActive }) =>
+      <NavLink to="/account" className={({ isActive }) =>
           `flex flex-col items-center ${isActive ? 'bottom-nav-active' : 'text-muted-foreground'}`
         }>
-        <Tv />
-        <span className="text-xs">Web Series</span>
+        <User />
+        <span className="text-xs">Account</span>
       </NavLink>
-      <NavLink to="/account" className={({ isActive }) =>
+    </div>
+  );
+};
           `flex flex-col items-center ${isActive ? 'bottom-nav-active' : 'text-muted-foreground'}`
         }>
         <User />

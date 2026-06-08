@@ -1,10 +1,9 @@
-import { History, Home, Tv, User } from "lucide-react";
+import { History, Home, User } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/", label: "Home", icon: Home },
-  { href: "/web-series", label: "Web Series", icon: Tv },
   { href: "/account", label: "Account", icon: User },
   { href: "/continue", label: "Continue", icon: History },
 ];

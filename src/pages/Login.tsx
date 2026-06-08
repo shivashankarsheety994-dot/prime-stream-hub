@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import logo from "@/assets/Primeflix.png";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -43,15 +42,7 @@ export default function Login() {
       />
       <div className="w-full max-w-md animate-fade-in">
         <div className="text-center mb-8">
-          <img
-            src={logo}
-            alt="Primeflix"
-            width={1536}
-            height={1024}
-            className="mx-auto h-96 md:h-[500px] w-auto object-contain drop-shadow-[0_0_30px_hsl(var(--primary)/0.6)] mb-4"
-          />
-          <h1 className="sr-only">Primeflix</h1>
-          <p className="text-muted-foreground">Sign in to continue streaming</p>
+          <p className="text-2xl font-semibold text-foreground">Sign in to continue streaming</p>
         </div>
         <form onSubmit={onSubmit} className="bg-card/80 backdrop-blur border border-border rounded-lg p-8 space-y-5 shadow-2xl">
           <div className="space-y-2">

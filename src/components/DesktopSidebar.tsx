@@ -1,6 +1,5 @@
-
 import { NavLink } from "react-router-dom";
-import { Home, Play, User, Tv } from "lucide-react";
+import { Home, Play, User } from "lucide-react";
 
 export const DesktopSidebar = () => {
   return (
@@ -17,12 +16,6 @@ export const DesktopSidebar = () => {
         }>
           <Play className="h-6 w-6 mb-1" />
           <span className="text-xs">Continue</span>
-        </NavLink>
-        <NavLink to="/web-series" className={({ isActive }) =>
-          `flex flex-col items-center ${isActive ? 'sidebar-icon-active' : 'text-muted-foreground'}`
-        }>
-          <Tv className="h-6 w-6 mb-1" />
-          <span className="text-xs text-center">Web Series</span>
         </NavLink>
         <NavLink to="/account" className={({ isActive }) =>
           `flex flex-col items-center ${isActive ? 'sidebar-icon-active' : 'text-muted-foreground'}`
