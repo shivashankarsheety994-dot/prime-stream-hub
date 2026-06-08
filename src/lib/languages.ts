@@ -34,3 +34,16 @@ export function filterByLanguage(
   });
   return matches;
 }
+
+export function getStreamLanguages(
+  stream: VodStream,
+  categories: VodCategory[],
+): LanguageDef[] {
+  const catNameById = new Map(categories.map((c) => [c.category_id, c.category_name.toLowerCase()]));
+  const catName = stream.category_id ? catNameById.get(stream.category_id) ?? "" : "";
+  const name = stream.name.toLowerCase();
+  
+  return LANGUAGES.filter((lang) =>
+    lang.keywords.some((k) => catName.includes(k) || name.includes(k))
+  );
+}

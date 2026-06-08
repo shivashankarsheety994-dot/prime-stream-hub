@@ -4,12 +4,13 @@ import { CinemaLoader } from "@/components/CinemaLoader";
 import { useAuth } from "@/context/AuthContext";
 import { Header } from "@/components/Header";
 import { MovieCard } from "@/components/MovieCard";
-import { getVodStreams, VodStream } from "@/lib/xtream";
+import { getVodStreams, getVodCategories, VodStream, VodCategory } from "@/lib/xtream";
 import { Hero } from "@/components/Hero";
 
 export default function Index() {
   const { user, credentials, loading } = useAuth();
   const [streams, setStreams] = useState<VodStream[]>([]);
+  const [categories, setCategories] = useState<VodCategory[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
@@ -17,8 +18,12 @@ export default function Index() {
     let cancelled = false;
     (async () => {
       setDataLoading(true);
-      const vods = await getVodStreams(credentials.username, credentials.password);
+      const [cats, vods] = await Promise.all([
+        getVodCategories(credentials.username, credentials.password),
+        getVodStreams(credentials.username, credentials.password),
+      ]);
       if (!cancelled) {
+        setCategories(cats);
         setStreams(vods);
         setDataLoading(false);
       }
@@ -62,7 +67,7 @@ export default function Index() {
             </div>
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3 p-4">
               {sortedStreams.map((movie) => (
-                <MovieCard key={movie.stream_id} movie={movie} />
+                <MovieCard key={movie.stream_id} movie={movie} categories={categories} />
               ))}
             </div>
           </>

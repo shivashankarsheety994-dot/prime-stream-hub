@@ -1,15 +1,17 @@
 
 import { useState } from "react";
 import { Star } from "lucide-react";
-import { VodStream } from "@/lib/xtream";
+import { VodStream, VodCategory } from "@/lib/xtream";
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getStreamLanguages } from "@/lib/languages";
 
-export function MovieCard({ movie }: { movie: VodStream }) {
+export function MovieCard({ movie, categories = [] }: { movie: VodStream; categories?: VodCategory[] }) {
   const navigate = useNavigate();
   const [loaded, setLoaded] = useState(false);
   const rating = movie.rating ? Number(movie.rating) : 0;
   const hasImage = Boolean(movie.stream_icon);
+  const languages = getStreamLanguages(movie, categories);
 
   const handleMovieClick = () => {
     navigate(`/movie/${movie.stream_id}`);
@@ -52,6 +54,11 @@ export function MovieCard({ movie }: { movie: VodStream }) {
       </div>
       <div className="p-2">
         <p className="text-sm font-bold text-white line-clamp-1">{movie.name}</p>
+        {languages.length > 0 && (
+          <p className="text-xs text-gray-400 line-clamp-1 mt-1">
+            {languages.map((lang) => lang.english).join(", ")}
+          </p>
+        )}
       </div>
     </button>
   );
