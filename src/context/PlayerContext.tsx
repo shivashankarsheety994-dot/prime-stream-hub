@@ -23,6 +23,17 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
 
   const play = (movie: VodStream, startTime?: number) => {
+    const normalizedStatus = user?.status?.toLowerCase().trim() ?? "";
+    const accountClosed = normalizedStatus.includes("closed") || normalizedStatus.includes("inactive") || normalizedStatus.includes("cancelled") || normalizedStatus.includes("suspended");
+    if (accountClosed) {
+      toast({
+        title: "Subscription Closed",
+        description: "Your subscription is closed. Please renew to continue watching.",
+        action: <ToastAction altText="Subscribe" onClick={() => navigate("/plans")}>Subscribe Now</ToastAction>,
+      });
+      return;
+    }
+
     if (user?.exp_date) {
       const expDate = new Date(Number(user.exp_date) * 1000);
       const now = new Date();
@@ -35,6 +46,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         return;
       }
     }
+
     setCurrent({ ...movie, startTime });
   };
 

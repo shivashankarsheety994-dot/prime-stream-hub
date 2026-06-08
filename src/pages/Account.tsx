@@ -19,17 +19,39 @@ export default function Account() {
     return name.substring(0, 2).toUpperCase();
   };
 
+  const parseExpDate = (value?: string | number | null) => {
+    if (value == null) return null;
+    const timestamp = typeof value === "number" ? value : Number(value);
+    if (Number.isNaN(timestamp) || timestamp <= 0) return null;
+    return new Date(timestamp < 1e12 ? timestamp * 1000 : timestamp);
+  };
+
+  const expDate = parseExpDate(user.exp_date);
+  const isUnlimited = user.exp_date === null;
+  const normalizedStatus = user.status?.toLowerCase().trim() ?? "";
+  const statusClosed = normalizedStatus.includes("closed") || normalizedStatus.includes("inactive") || normalizedStatus.includes("cancelled") || normalizedStatus.includes("suspended");
+  const hasValidExpiry = !!expDate && expDate.getTime() > 0;
+  const isExpired = !isUnlimited && hasValidExpiry ? expDate.getTime() < Date.now() : !isUnlimited && user.exp_date != null && !expDate;
+  const isClosed = isExpired || statusClosed;
+  const subscriptionStatus = isClosed ? "Closed" : user.status || "Active";
+
   const daysRemaining = () => {
-    if (user.exp_date === null) {
+    if (isUnlimited) {
       return <Infinity className="h-8 w-8" />;
     }
-    const expDate = new Date(parseInt(user.exp_date, 10) * 1000);
+    if (isClosed) {
+      return "Closed";
+    }
+    if (!expDate) {
+      return "Closed";
+    }
     const now = new Date();
     const diff = expDate.getTime() - now.getTime();
-    if (diff < 0) return "Expired";
-    const days = Math.ceil(diff / (1000 * 3600 * 24));
-    return days;
+    if (diff < 0) return "Closed";
+    return Math.ceil(diff / (1000 * 3600 * 24));
   };
+
+  const expiresLabel = isUnlimited ? "Unlimited" : isClosed || !expDate ? "Closed" : formatTimestamp(expDate.getTime(), { month: 'short', day: 'numeric', year: 'numeric' });
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -57,7 +79,7 @@ export default function Account() {
               <p className="text-sm md:text-base text-gray-400">PrimeFlix Member</p>
               <div className="flex items-center gap-1 mt-2 bg-green-600/50 text-green-300 border border-green-500 rounded-full px-2 py-0.5 text-xs md:text-sm w-fit md:mx-auto">
                 <ShieldCheck className="h-3 w-3 md:h-4 md:w-4" />
-                <span>{user.status || "Active"}</span>
+                <span>{subscriptionStatus}</span>
               </div>
             </div>
           </div>
@@ -74,10 +96,10 @@ export default function Account() {
             <SubscriptionCard
               icon={<CalendarX className="h-6 w-6 text-gray-400" />}
               label="EXPIRES"
-              value={user.exp_date === null ? "Unlimited" : formatTimestamp(user.exp_date, { month: 'short', day: 'numeric', year: 'numeric' })}
+              value={expiresLabel}
             />
             <SubscriptionCard
-              icon={typeof daysRemaining() === 'number' ? <Infinity className="h-6 w-6 text-gray-400" /> : <Infinity className="h-6 w-6 text-gray-400" />}
+              icon={isUnlimited ? <Infinity className="h-6 w-6 text-gray-400" /> : <CalendarX className="h-6 w-6 text-gray-400" />}
               label="DAYS REMAINING"
               value={daysRemaining()}
             />

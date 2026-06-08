@@ -54,13 +54,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = useCallback(async (username: string, password: string) => {
     try {
       const res = await apiLogin(username, password);
-      if (res?.user_info?.auth === 1) {
+      if (res?.user_info) {
         setUser(res.user_info);
         setCredentials({ username, password });
         localStorage.setItem(STORAGE_KEY, JSON.stringify({ user: res.user_info, credentials: { username, password } }));
+      }
+
+      if (res?.user_info?.auth === 1) {
         return { ok: true };
       }
-      return { ok: false, error: res?.user_info?.message || "Invalid credentials" };
+
+      const status = res?.user_info?.status?.toLowerCase() ?? "";
+      const message = res?.user_info?.message?.toLowerCase() ?? "";
+      const closedAccount = status.includes("closed") || status.includes("inactive") || status.includes("cancel") || status.includes("suspended");
+      const subscriptionProblem = message.includes("expired") || message.includes("closed") || message.includes("inactive") || message.includes("cancel");
+
+      if (closedAccount || subscriptionProblem) {
+        return { ok: true };
+      }
+
+      if (message.includes("invalid") || message.includes("incorrect") || message.includes("failed")) {
+        return { ok: false, error: res?.user_info?.message || "Invalid credentials" };
+      }
+
+      return { ok: Boolean(res?.user_info), error: res?.user_info?.message || "Login failed" };
     } catch (e) {
       return { ok: false, error: e instanceof Error ? e.message : "Login failed" };
     }
@@ -74,9 +91,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshUser = useCallback(async () => {
     if (credentials) {
-      await signIn(credentials.username, credentials.password);
+      const result = await signIn(credentials.username, credentials.password);
+      if (!result.ok && result.error?.toLowerCase().includes("invalid")) {
+        signOut();
+      }
     }
-  }, [credentials, signIn]);
+  }, [credentials, signIn, signOut]);
 
   const value = useMemo(() => ({
     user,
