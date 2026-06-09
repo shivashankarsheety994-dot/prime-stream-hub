@@ -86,7 +86,7 @@ export default function Genre() {
     const grouped: Record<string, VodStream[]> = {};
     movies.forEach((movie) => {
       const info = vodInfoMap.get(movie.stream_id);
-      const language = getVodLanguage(info) || "Unknown Language";
+      const language = getVodLanguage(info) || "All Movies";
       if (!grouped[language]) {
         grouped[language] = [];
       }
@@ -108,14 +108,9 @@ export default function Genre() {
         >
           <ChevronLeft className="h-4 w-4" /> Back
         </Link>
-        <h1 className="text-3xl md:text-4xl font-bold mb-1 capitalize">
+        <h1 className="text-3xl md:text-4xl font-bold mb-6 capitalize">
           {decodedGenreName}
         </h1>
-        <p className="text-muted-foreground mb-6">
-          {dataLoading
-            ? "Loading genre movies..."
-            : `${movies.length} movies`}
-        </p>
 
         {dataLoading ? (
           <CinemaLoader label={`Loading ${decodedGenreName}`} />
