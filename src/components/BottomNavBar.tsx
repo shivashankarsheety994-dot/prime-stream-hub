@@ -7,19 +7,19 @@ export const BottomNavBar = () => {
       <NavLink to="/" className={({ isActive }) =>
           `flex flex-col items-center ${isActive ? 'bottom-nav-active' : 'text-muted-foreground'}`
         }>
-        <Home />
+        <Home className="h-5 w-5 text-[#dca250]" />
         <span className="text-xs">Home</span>
       </NavLink>
       <NavLink to="/continue" className={({ isActive }) =>
           `flex flex-col items-center ${isActive ? 'bottom-nav-active' : 'text-muted-foreground'}`
         }>
-        <Play />
+        <Play className="h-5 w-5 text-[#dca250]" />
         <span className="text-xs">Continue</span>
       </NavLink>
       <NavLink to="/account" className={({ isActive }) =>
           `flex flex-col items-center ${isActive ? 'bottom-nav-active' : 'text-muted-foreground'}`
         }>
-        <User />
+        <User className="h-5 w-5 text-[#dca250]" />
         <span className="text-xs">Account</span>
       </NavLink>
     </div>

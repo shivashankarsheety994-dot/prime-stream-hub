@@ -19,12 +19,12 @@ export function BottomNav() {
             end={href === "/"}
             className={({ isActive }) =>
               cn(
-                "flex flex-col items-center justify-center gap-1 text-xs text-muted-foreground transition-colors",
-                isActive ? "text-primary" : "hover:text-foreground"
+                "flex flex-col items-center justify-center gap-1 text-xs transition-colors",
+                isActive ? "text-[#dca250]" : "text-muted-foreground hover:text-[#dca250]"
               )
             }
           >
-            <Icon className="h-5 w-5" />
+            <Icon className="h-5 w-5 text-[#dca250]" />
             <span>{label}</span>
           </NavLink>
         ))}
