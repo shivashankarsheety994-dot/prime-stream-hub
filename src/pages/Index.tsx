@@ -4,13 +4,23 @@ import { CinemaLoader } from "@/components/CinemaLoader";
 import { useAuth } from "@/context/AuthContext";
 import { Header } from "@/components/Header";
 import { MovieCard } from "@/components/MovieCard";
-import { getVodStreams, getVodCategories, getStreamCategoryIds, VodStream, VodCategory } from "@/lib/xtream";
+import {
+  getVodStreams,
+  getVodCategories,
+  getStreamCategoryIds,
+  VodStream,
+  VodCategory,
+  getVodInfo,
+  getAllGenres,
+  parseGenres,
+} from "@/lib/xtream";
 import { Hero } from "@/components/Hero";
 
 export default function Index() {
   const { user, credentials, loading } = useAuth();
   const [streams, setStreams] = useState<VodStream[]>([]);
   const [categories, setCategories] = useState<VodCategory[]>([]);
+  const [genres, setGenres] = useState<string[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
@@ -18,14 +28,38 @@ export default function Index() {
     let cancelled = false;
     (async () => {
       setDataLoading(true);
-      const [cats, vods] = await Promise.all([
-        getVodCategories(credentials.username, credentials.password),
-        getVodStreams(credentials.username, credentials.password),
-      ]);
-      if (!cancelled) {
-        setCategories(cats);
-        setStreams(vods);
-        setDataLoading(false);
+      try {
+        const [cats, vods] = await Promise.all([
+          getVodCategories(credentials.username, credentials.password),
+          getVodStreams(credentials.username, credentials.password),
+        ]);
+
+        if (!cancelled) {
+          setCategories(cats);
+          setStreams(vods);
+
+          // Fetch genre data from all VOD info
+          const vodInfos = await Promise.all(
+            vods.map((stream) =>
+              getVodInfo(
+                credentials.username,
+                credentials.password,
+                stream.stream_id
+              )
+            )
+          );
+
+          if (!cancelled) {
+            const allGenres = getAllGenres(vodInfos);
+            setGenres(allGenres);
+            setDataLoading(false);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        if (!cancelled) {
+          setDataLoading(false);
+        }
       }
     })();
     return () => { cancelled = true; };
@@ -72,29 +106,51 @@ export default function Index() {
         ) : (
           <>
             {heroMovies.length > 0 && <Hero movies={heroMovies} />}
-          {categoriesWithMovies.length > 0 && (
-            <section className="px-4 mt-6">
-              <div className="flex items-center justify-between gap-3 mb-3">
-                <div>
-                  <h2 className="text-xl font-bold">Browse by Category</h2>
-                  <p className="text-sm text-muted-foreground">Tap a category to open its own page and view all matching movies.</p>
+            {genres.length > 0 && (
+              <section className="px-4 mt-6">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <div>
+                    <h2 className="text-xl font-bold">Browse by Genre</h2>
+                    <p className="text-sm text-muted-foreground">Tap a genre to open its own page and view all matching movies organized by language.</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory scroll-pl-4">
-                {categoriesWithMovies.map(({ category, count }) => (
-                  <Link
-                    key={category.category_id}
-                    to={`/category/${category.category_id}`}
-                    className="snap-start inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-100 hover:bg-amber-500/20 transition"
-                  >
-                    <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
-                    <span>{category.category_name}</span>
-                    <span className="ml-2 rounded-full bg-amber-400/20 px-2 py-0.5 text-xs text-amber-100">{count}</span>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
+                <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory scroll-pl-4">
+                  {genres.map((genre) => (
+                    <Link
+                      key={genre}
+                      to={`/genre/${encodeURIComponent(genre)}`}
+                      className="snap-start inline-flex items-center gap-2 rounded-full border border-purple-400/40 bg-purple-500/10 px-4 py-2 text-sm font-semibold text-purple-100 hover:bg-purple-500/20 transition"
+                    >
+                      <span className="h-2.5 w-2.5 rounded-full bg-purple-300" />
+                      <span className="capitalize">{genre}</span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+            {categoriesWithMovies.length > 0 && (
+              <section className="px-4 mt-6">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <div>
+                    <h2 className="text-xl font-bold">Browse by Category</h2>
+                    <p className="text-sm text-muted-foreground">Tap a category to open its own page and view all matching movies.</p>
+                  </div>
+                </div>
+                <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory scroll-pl-4">
+                  {categoriesWithMovies.map(({ category, count }) => (
+                    <Link
+                      key={category.category_id}
+                      to={`/category/${category.category_id}`}
+                      className="snap-start inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-100 hover:bg-amber-500/20 transition"
+                    >
+                      <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
+                      <span>{category.category_name}</span>
+                      <span className="ml-2 rounded-full bg-amber-400/20 px-2 py-0.5 text-xs text-amber-100">{count}</span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
             <div className="px-4 mt-6">
               <h2 className="text-xl font-bold">Latest Releases</h2>
             </div>

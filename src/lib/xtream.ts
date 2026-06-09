@@ -110,6 +110,7 @@ export interface VodInfo {
     cover_big?: string;
     plot?: string;
     genre?: string;
+    language?: string;
     duration?: string;
     releasedate?: string;
     rating?: string;
@@ -122,6 +123,10 @@ export interface VodInfo {
     name: string;
     container_extension?: string;
   };
+}
+
+export interface GenreCategory extends VodCategory {
+  isGenre: true;
 }
 
 export async function getVodInfo(
@@ -161,4 +166,76 @@ export function buildStreamUrl(
   return `${base}/movie/${encodeURIComponent(
     username,
   )}/${encodeURIComponent(password)}/${movie.stream_id}.${ext}`;
+}
+
+/**
+ * Parse genres from genre string (comma or pipe separated)
+ * Normalizes and removes duplicates
+ */
+export function parseGenres(genreString?: string): string[] {
+  if (!genreString) return [];
+  return genreString
+    .split(/[,|;]/)
+    .map((genre) => genre.trim())
+    .filter(Boolean)
+    .map((genre) => genre.toLowerCase());
+}
+
+/**
+ * Get all unique genres from a collection of VOD info objects
+ * Deduplicates and sorts alphabetically
+ */
+export function getAllGenres(vodInfos: (VodInfo | null)[]): string[] {
+  const genreSet = new Set<string>();
+  vodInfos.forEach((info) => {
+    const genres = parseGenres(info?.info?.genre);
+    genres.forEach((g) => genreSet.add(g));
+  });
+  return Array.from(genreSet).sort();
+}
+
+/**
+ * Get language from a VOD info object
+ */
+export function getVodLanguage(info: VodInfo | null): string {
+  return info?.info?.language?.trim() || "";
+}
+
+/**
+ * Create genre categories from VOD information
+ * Returns a deduplicated list of genre-based categories
+ */
+export async function getGenreCategories(
+  username: string,
+  password: string,
+  streams: VodStream[],
+): Promise<GenreCategory[]> {
+  // Fetch info for all streams to extract genres
+  const vodInfos = await Promise.all(
+    streams.map((stream) => getVodInfo(username, password, stream.stream_id))
+  );
+  
+  const genres = getAllGenres(vodInfos);
+  
+  return genres.map((genre, index) => ({
+    category_id: `genre_${genre.replace(/\s+/g, "_")}`,
+    category_name: genre.charAt(0).toUpperCase() + genre.slice(1),
+    isGenre: true,
+  }));
+}
+
+/**
+ * Get streams that match a specific genre
+ */
+export function getStreamsByGenre(
+  streams: VodStream[],
+  vodInfoMap: Map<number, VodInfo | null>,
+  genreName: string,
+): VodStream[] {
+  const targetGenre = genreName.toLowerCase();
+  return streams.filter((stream) => {
+    const info = vodInfoMap.get(stream.stream_id);
+    const genres = parseGenres(info?.info?.genre);
+    return genres.includes(targetGenre);
+  });
 }
