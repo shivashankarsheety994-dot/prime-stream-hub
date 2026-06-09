@@ -10,6 +10,7 @@ import Login from "./pages/Login.tsx";
 import Account from "./pages/Account.tsx";
 import Plans from "./pages/Plans.tsx";
 import Language from "./pages/Language.tsx";
+import Category from "./pages/Category.tsx";
 import Continue from "./pages/Continue.tsx";
 import MovieDetail from "./pages/MovieDetail.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
@@ -36,6 +37,7 @@ const App = () => (
                   <Route path="/account" element={<Account />} />
                   <Route path="/plans" element={<Plans />} />
                   <Route path="/language/:slug" element={<Language />} />
+                  <Route path="/category/:categoryId" element={<Category />} />
                   <Route path="/continue" element={<Continue />} />
                   <Route path="/movie/:id" element={<MovieDetail />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL \"*\" ROUTE */}

@@ -71,6 +71,14 @@ export async function getVodStreams(username: string, password: string, category
   }
 }
 
+export function getStreamCategoryIds(stream: VodStream): string[] {
+  if (!stream.category_id) return [];
+  return stream.category_id
+    .split(/[,|;]/)
+    .map((id) => id.trim())
+    .filter(Boolean);
+}
+
 export function formatTimestamp(ts?: string | number, options?: Intl.DateTimeFormatOptions): string {
   if (ts === undefined || ts === null || ts === "") return "—";
 

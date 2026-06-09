@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { CinemaLoader } from "@/components/CinemaLoader";
 import { useAuth } from "@/context/AuthContext";
 import { Header } from "@/components/Header";
 import { MovieCard } from "@/components/MovieCard";
-import { getVodStreams, getVodCategories, VodStream, VodCategory } from "@/lib/xtream";
+import { getVodStreams, getVodCategories, getStreamCategoryIds, VodStream, VodCategory } from "@/lib/xtream";
 import { Hero } from "@/components/Hero";
 
 export default function Index() {
@@ -43,6 +43,16 @@ export default function Index() {
     return sortedStreams.slice(0, 5);
   }, [sortedStreams]);
 
+  const categoriesWithMovies = useMemo(() => {
+    return categories
+      .map((category) => ({
+        category,
+        count: sortedStreams.filter((stream) => getStreamCategoryIds(stream).includes(category.category_id)).length,
+      }))
+      .filter((item) => item.count > 0)
+      .sort((a, b) => b.count - a.count);
+  }, [categories, sortedStreams]);
+
   if (loading) {
     return <CinemaLoader fullscreen />;
   }
@@ -62,6 +72,29 @@ export default function Index() {
         ) : (
           <>
             {heroMovies.length > 0 && <Hero movies={heroMovies} />}
+          {categoriesWithMovies.length > 0 && (
+            <section className="px-4 mt-6">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <div>
+                  <h2 className="text-xl font-bold">Browse by Category</h2>
+                  <p className="text-sm text-muted-foreground">Tap a category to open its own page and view all matching movies.</p>
+                </div>
+              </div>
+              <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory scroll-pl-4">
+                {categoriesWithMovies.map(({ category, count }) => (
+                  <Link
+                    key={category.category_id}
+                    to={`/category/${category.category_id}`}
+                    className="snap-start inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-100 hover:bg-amber-500/20 transition"
+                  >
+                    <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
+                    <span>{category.category_name}</span>
+                    <span className="ml-2 rounded-full bg-amber-400/20 px-2 py-0.5 text-xs text-amber-100">{count}</span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
             <div className="px-4 mt-6">
               <h2 className="text-xl font-bold">Latest Releases</h2>
             </div>
