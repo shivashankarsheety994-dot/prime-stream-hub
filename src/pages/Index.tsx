@@ -126,7 +126,7 @@ export default function Index() {
                       <Link
                         key={genre}
                         to={`/genre/${encodeURIComponent(genre)}`}
-                        className="snap-start inline-flex flex-shrink-0 items-center justify-center gap-2 rounded-lg border-0 bg-[#dca250] px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-[#c7994a] active:bg-[#b18644] transition"
+                        className="snap-start inline-flex flex-shrink-0 items-center justify-center gap-2 rounded-lg border border-[#b18644] bg-gradient-to-br from-[#dca250] via-[#d7a64f] to-[#bd8f43] px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold text-white shadow-[0_12px_25px_-10px_rgba(220,162,80,0.8)] transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-[0_16px_30px_-12px_rgba(220,162,80,0.95)] active:translate-y-0.5 active:shadow-[0_8px_15px_-8px_rgba(220,162,80,0.7)]"
                       >
                         <span className="capitalize">{genre}</span>
                       </Link>
