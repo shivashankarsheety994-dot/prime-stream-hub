@@ -192,6 +192,12 @@ const MovieDetail: React.FC = () => {
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-4 text-sm mt-6 max-w-3xl">
+            {vodInfo?.info?.genre && (
+              <div>
+                <strong className="block text-gray-400">Genre</strong>
+                <span>{vodInfo.info.genre}</span>
+              </div>
+            )}
             {vodInfo?.info?.director && (
               <div>
                 <strong className="block text-gray-400">Director</strong>

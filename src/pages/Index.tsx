@@ -114,24 +114,26 @@ export default function Index() {
           <>
             {heroMovies.length > 0 && <Hero movies={heroMovies} />}
             {genres.length > 0 && (
-              <section className="px-4 mt-6">
-                <div className="flex items-center justify-between gap-3 mb-3">
+              <section className="mt-6">
+                <div className="flex items-center justify-between gap-3 mb-3 px-2 sm:px-4">
                   <div>
                     <h2 className="text-xl font-bold">Browse by Genre</h2>
                     <p className="text-sm text-muted-foreground">Tap a genre to open its own page and view all matching movies organized by language.</p>
                   </div>
                 </div>
-                <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory scroll-pl-4">
-                  {genres.map((genre) => (
-                    <Link
-                      key={genre}
-                      to={`/genre/${encodeURIComponent(genre)}`}
-                      className="snap-start inline-flex items-center gap-2 rounded-full border border-purple-400/40 bg-purple-500/10 px-4 py-2 text-sm font-semibold text-purple-100 hover:bg-purple-500/20 transition"
-                    >
-                      <span className="h-2.5 w-2.5 rounded-full bg-purple-300" />
-                      <span className="capitalize">{genre}</span>
-                    </Link>
-                  ))}
+                <div className="w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
+                  <div className="flex gap-2 sm:gap-3 overflow-x-auto overflow-y-hidden scrollbar-hide pb-2 snap-x snap-mandatory scroll-pl-2 sm:scroll-pl-4 px-2 sm:px-4">
+                    {genres.map((genre) => (
+                      <Link
+                        key={genre}
+                        to={`/genre/${encodeURIComponent(genre)}`}
+                        className="snap-start inline-flex flex-shrink-0 items-center gap-2 rounded-full border border-purple-400/40 bg-purple-500/10 px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-purple-100 hover:bg-purple-500/20 active:bg-purple-500/30 transition"
+                      >
+                        <span className="h-2.5 w-2.5 rounded-full bg-purple-300 flex-shrink-0" />
+                        <span className="capitalize">{genre}</span>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </section>
             )}
