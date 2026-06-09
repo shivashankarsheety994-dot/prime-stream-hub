@@ -19,12 +19,14 @@ export function BottomNav() {
             end={href === "/"}
             className={({ isActive }) =>
               cn(
-                "flex flex-col items-center justify-center gap-1 text-xs transition-colors",
-                isActive ? "text-[#dca250]" : "text-muted-foreground hover:text-[#dca250]"
+                "flex flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 text-xs transition-all duration-150",
+                isActive
+                  ? "bg-[#dca250] text-black shadow-[0_12px_24px_-10px_rgba(220,162,80,0.8)] hover:shadow-[0_16px_28px_-12px_rgba(220,162,80,0.95)] active:translate-y-0.5 active:shadow-[0_8px_14px_-8px_rgba(220,162,80,0.7)]"
+                  : "bg-background/80 text-muted-foreground hover:bg-[#dca250]/20 hover:text-[#dca250]"
               )
             }
           >
-            <Icon className="h-5 w-5 text-[#dca250]" />
+            <Icon className="h-5 w-5" />
             <span>{label}</span>
           </NavLink>
         ))}
