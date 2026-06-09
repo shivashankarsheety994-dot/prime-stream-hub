@@ -12,7 +12,7 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex min-h-screen">
       {showNav && <DesktopSidebar />}
-      <main className={`flex-1 ${showNav ? 'md:ml-20' : ''} ${showNav ? 'pb-16 md:pb-0' : ''}`}>
+      <main className={`flex-1 min-w-0 ${showNav ? 'md:ml-28' : ''} ${showNav ? 'pb-16 md:pb-0' : ''}`}>
         {children}
       </main>
       {showNav && (

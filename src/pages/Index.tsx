@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { CinemaLoader } from "@/components/CinemaLoader";
 import { useAuth } from "@/context/AuthContext";
 import { Header } from "@/components/Header";
@@ -84,6 +85,24 @@ export default function Index() {
     return sortedStreams.slice(0, 5);
   }, [sortedStreams]);
 
+  const genreScrollRef = useRef<HTMLDivElement | null>(null);
+  const [showGenreArrows, setShowGenreArrows] = useState(false);
+
+  useEffect(() => {
+    const updateArrowVisibility = () => {
+      const element = genreScrollRef.current;
+      if (!element) {
+        setShowGenreArrows(false);
+        return;
+      }
+      setShowGenreArrows(element.scrollWidth > element.clientWidth + 8);
+    };
+
+    updateArrowVisibility();
+    window.addEventListener("resize", updateArrowVisibility);
+    return () => window.removeEventListener("resize", updateArrowVisibility);
+  }, [genres]);
+
   const categoriesWithMovies = useMemo(() => {
     return categories
       .map((category) => ({
@@ -94,15 +113,23 @@ export default function Index() {
       .sort((a, b) => b.count - a.count);
   }, [categories, sortedStreams]);
 
+  const scrollGenres = (direction: number) => {
+    if (!genreScrollRef.current) return;
+    genreScrollRef.current.scrollBy({
+      left: direction * 280,
+      behavior: "smooth",
+    });
+  };
+
   if (loading) {
     return <CinemaLoader fullscreen />;
   }
   if (!user) return <Navigate to="/login" replace />;
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen min-w-0 bg-background overflow-x-hidden">
       <Header />
-      <main className="relative z-10">
+      <main className="relative z-10 min-w-0 max-w-full">
         {dataLoading ? (
           <CinemaLoader label="Loading movies" />
         ) : streams.length === 0 ? (
@@ -114,24 +141,53 @@ export default function Index() {
           <>
             {heroMovies.length > 0 && <Hero movies={heroMovies} />}
             {genres.length > 0 && (
-              <section className="mt-6">
-                <div className="flex items-center justify-between gap-3 mb-3 px-2 sm:px-4">
+              <section className="mt-6 min-w-0">
+                <div className="flex items-center justify-between gap-3 mb-3 px-2 sm:px-4 min-w-0">
                   <div>
                     <h2 className="text-xl font-bold">Browse by Genre</h2>
+                    <div className="mt-1 text-xs text-muted-foreground md:hidden flex items-center gap-1">
+                      <ChevronLeft className="h-3 w-3" />
+                      Swipe left/right
+                      <ChevronRight className="h-3 w-3" />
+                    </div>
                   </div>
                 </div>
-                <div className="w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
-                  <div className="flex gap-2 sm:gap-3 overflow-x-auto overflow-y-hidden scrollbar-hide pb-2 snap-x snap-mandatory scroll-pl-2 sm:scroll-pl-4 px-2 sm:px-4">
+                <div className="relative md:overflow-hidden min-w-0">
+                  {showGenreArrows && (
+                    <button
+                      type="button"
+                      onClick={() => scrollGenres(-1)}
+                      className="absolute left-2 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-[#dca250] text-black shadow-lg shadow-[#dca250]/30 transition hover:bg-[#c7994a] focus:outline-none md:flex hidden"
+                      aria-label="Scroll genres left"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                  )}
+                  <div
+                    ref={genreScrollRef}
+                    className="flex min-w-0 gap-2 sm:gap-3 overflow-x-auto overflow-y-hidden scrollbar-hide pb-2 snap-x snap-mandatory scroll-pl-2 sm:scroll-pl-4 px-2 sm:px-4"
+                    style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x" }}
+                  >
                     {genres.map((genre) => (
                       <Link
                         key={genre}
                         to={`/genre/${encodeURIComponent(genre)}`}
-                        className="snap-start inline-flex flex-shrink-0 items-center justify-center gap-2 rounded-lg border border-[#b18644] bg-gradient-to-br from-[#dca250] via-[#d7a64f] to-[#bd8f43] px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold text-white shadow-[0_12px_25px_-10px_rgba(220,162,80,0.8)] transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-[0_16px_30px_-12px_rgba(220,162,80,0.95)] active:translate-y-0.5 active:shadow-[0_8px_15px_-8px_rgba(220,162,80,0.7)]"
+                        className="snap-start inline-flex min-w-max flex-shrink-0 items-center justify-center gap-2 rounded-lg border border-[#b18644] bg-gradient-to-br from-[#dca250] via-[#d7a64f] to-[#bd8f43] px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold text-white shadow-[0_12px_25px_-10px_rgba(220,162,80,0.8)] transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-[0_16px_30px_-12px_rgba(220,162,80,0.95)] active:translate-y-0.5 active:shadow-[0_8px_15px_-8px_rgba(220,162,80,0.7)]"
                       >
                         <span className="capitalize">{genre}</span>
                       </Link>
                     ))}
                   </div>
+                  {showGenreArrows && (
+                    <button
+                      type="button"
+                      onClick={() => scrollGenres(1)}
+                      className="absolute right-2 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-[#dca250] text-black shadow-lg shadow-[#dca250]/30 transition hover:bg-[#c7994a] focus:outline-none md:flex hidden"
+                      aria-label="Scroll genres right"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
               </section>
             )}
