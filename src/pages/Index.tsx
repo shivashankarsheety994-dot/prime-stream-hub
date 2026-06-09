@@ -118,7 +118,6 @@ export default function Index() {
                 <div className="flex items-center justify-between gap-3 mb-3 px-2 sm:px-4">
                   <div>
                     <h2 className="text-xl font-bold">Browse by Genre</h2>
-                    <p className="text-sm text-muted-foreground">Tap a genre to open its own page and view all matching movies organized by language.</p>
                   </div>
                 </div>
                 <div className="w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
