@@ -5,13 +5,23 @@ import { CinemaLoader } from "@/components/CinemaLoader";
 import { Header } from "@/components/Header";
 import { MovieCard } from "@/components/MovieCard";
 import { useAuth } from "@/context/AuthContext";
-import { getVodCategories, getVodStreams, getStreamCategoryIds, VodCategory, VodStream } from "@/lib/xtream";
+import { 
+  getVodCategories, 
+  getVodStreams, 
+  getStreamCategoryIds, 
+  getVodInfo,
+  getVodLanguage,
+  VodCategory, 
+  VodStream,
+  VodInfo,
+} from "@/lib/xtream";
 
 export default function Category() {
   const { categoryId } = useParams();
   const { user, credentials, loading } = useAuth();
   const [categories, setCategories] = useState<VodCategory[]>([]);
   const [streams, setStreams] = useState<VodStream[]>([]);
+  const [vodInfoMap, setVodInfoMap] = useState<Map<number, VodInfo | null>>(new Map());
   const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
@@ -19,14 +29,39 @@ export default function Category() {
     let cancelled = false;
     (async () => {
       setDataLoading(true);
-      const [cats, vods] = await Promise.all([
-        getVodCategories(credentials.username, credentials.password),
-        getVodStreams(credentials.username, credentials.password),
-      ]);
-      if (!cancelled) {
-        setCategories(cats);
-        setStreams(vods);
-        setDataLoading(false);
+      try {
+        const [cats, vods] = await Promise.all([
+          getVodCategories(credentials.username, credentials.password),
+          getVodStreams(credentials.username, credentials.password),
+        ]);
+        
+        if (!cancelled) {
+          setCategories(cats);
+          setStreams(vods);
+
+          // Fetch VOD info for all streams
+          const infoMap = new Map<number, VodInfo | null>();
+          await Promise.all(
+            vods.map(async (stream) => {
+              const info = await getVodInfo(
+                credentials.username,
+                credentials.password,
+                stream.stream_id
+              );
+              infoMap.set(stream.stream_id, info);
+            })
+          );
+
+          if (!cancelled) {
+            setVodInfoMap(infoMap);
+            setDataLoading(false);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching category data:", error);
+        if (!cancelled) {
+          setDataLoading(false);
+        }
       }
     })();
     return () => { cancelled = true; };
@@ -68,7 +103,11 @@ export default function Category() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {movies.map((movie) => (
               <div key={movie.stream_id} className="w-full">
-                <MovieCard movie={movie} categories={categories} />
+                <MovieCard 
+                  movie={movie} 
+                  categories={categories}
+                  vodLanguage={getVodLanguage(vodInfoMap.get(movie.stream_id))}
+                />
               </div>
             ))}
           </div>

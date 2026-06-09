@@ -135,7 +135,11 @@ export default function Genre() {
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     {languageMovies.map((movie) => (
                       <div key={movie.stream_id} className="w-full">
-                        <MovieCard movie={movie} categories={categories} />
+                        <MovieCard 
+                          movie={movie} 
+                          categories={categories}
+                          vodLanguage={getVodLanguage(vodInfoMap.get(movie.stream_id))}
+                        />
                       </div>
                     ))}
                   </div>
